@@ -340,7 +340,7 @@ struct SemiMleExtended : public Functor {
 
 
         arma::Col<double> init_raw4 = {theta_star[64-ll],theta_star[65-ll]};
-        init(4-1,1-1) = 1/(1 + exp(init_raw4[1-1] + init_raw4[2-1]));
+        init(4-1,1-1) =                   1/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
         init(4-1,2-1) = exp(init_raw4[1-1])/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
         init(4-1,3-1) = exp(init_raw4[2-1])/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
 
@@ -371,24 +371,24 @@ struct SemiMleExtended : public Functor {
         // init(5-1,1-1) = 1 - (init(5-1,2-1) + init(5-1,3-1));
 
         arma::Col<double> init_raw2 = {theta_star[46-ll],theta_star[47-ll]};
-        init(2-1,1-1) = 1/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
+        init(2-1,1-1) =                   1/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
         init(2-1,2-1) = exp(init_raw2[1-1])/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
         init(2-1,3-1) = exp(init_raw2[2-1])/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
         
         
         arma::Col<double> init_raw3 = {theta_star[55-ll],theta_star[56-ll]};
-        init(3-1,1-1) = 1/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
+        init(3-1,1-1) =                   1/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
         init(3-1,2-1) = exp(init_raw3[1-1])/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
         init(3-1,3-1) = exp(init_raw3[2-1])/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
 
 
         arma::Col<double> init_raw4 = {theta_star[64-ll],theta_star[65-ll]};
-        init(4-1,1-1) = 1/(1 + exp(init_raw4[1-1] + init_raw4[2-1]));
+        init(4-1,1-1) =                   1/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
         init(4-1,2-1) = exp(init_raw4[1-1])/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
         init(4-1,3-1) = exp(init_raw4[2-1])/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
         
         arma::Col<double> init_raw5 = {theta_star[73-ll],theta_star[74-ll]};
-        init(5-1,1-1) = 1/(1 + exp(init_raw5[1-1] + init_raw5[2-1]));
+        init(5-1,1-1) =                   1/(1 + exp(init_raw5[1-1]) + exp(init_raw5[2-1]));
         init(5-1,2-1) = exp(init_raw5[1-1])/(1 + exp(init_raw5[1-1]) + exp(init_raw5[2-1]));
         init(5-1,3-1) = exp(init_raw5[2-1])/(1 + exp(init_raw5[1-1]) + exp(init_raw5[2-1]));
     }
@@ -841,6 +841,8 @@ arma::Col<double> semiMleExtended_bfgs_par(
   Roptim<SemiMleExtended> opt("BFGS");
 //   Roptim opt = new Roptim<SemiMleExtended>("BFGS");
   opt.control.trace = 1;
+  opt.control.maxit = 30000;
+
   // opt.set_hessian(true);
   // arma::vec x = {-1.2, 1};
   opt.minimize(sm, theta_star);

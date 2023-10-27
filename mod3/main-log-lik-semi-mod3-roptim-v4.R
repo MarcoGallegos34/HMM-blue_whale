@@ -26,16 +26,16 @@ seed = paste0("21234",opt$seed)
 #sourceCpp("mod3/log-lik-semi.cpp")
 stan_data$K = 4
 mod1.nlm = readRDS("mle/nlm.output.rds")
-# stan_data$estimate = mod1.nlm$estimate 
-stan_data$estimate = c(mod1.nlm$estimate[1:6],
-                       139,342,515,log(77.8),log(217),log(129),
-                       71.3,84.8,150,log(68.1),log(56.5),log(69.2),
-                       32.2,67.7,169,log(23.3),log(64.4),log(60.9),
-                       193,693,409,log(138),log(304),log(287),
-                       log(1),log(3.1),log(.8),
-                       log(.94),log(.518),log(1.66),
-                       log(2.05),log(6.55),log(1.58),
-                       log(.656),log(.01),log(3.31))
+stan_data$estimate = mod1.nlm$estimate
+# stan_data$estimate = c(mod1.nlm$estimate[1:6],
+#                        139,342,515,log(77.8),log(217),log(129),
+#                        71.3,84.8,150,log(68.1),log(56.5),log(69.2),
+#                        32.2,67.7,169,log(23.3),log(64.4),log(60.9),
+#                        193,693,409,log(138),log(304),log(287),
+#                        log(1),log(3.1),log(.8),
+#                        log(.94),log(.518),log(1.66),
+#                        log(2.05),log(6.55),log(1.58),
+#                        log(.656),log(.01),log(3.31))
 
 
 ### K = 4 ###
@@ -65,38 +65,28 @@ mod3_init_mat = matrix(NA,41,500)
 # }
 
 for(i in 1:500){
-  aux_inits = rdirichlet(4,alpha=rep(1,3))
-  aux_theta = rdirichlet(1,alpha=rep(1,4))
+  # aux_inits = rdirichlet(4,alpha=rep(1,3))
+  # aux_theta = rdirichlet(1,alpha=rep(1,4))
   
-  mod3_init_mat[,i] = c(c(rnorm(1,-5+.997,1),rnorm(1,-5+27.1,1),
-                          rnorm(1,-1.25 -17,1),rnorm(1,-5-.147,1),
-                          rnorm(1,-4.5 + 1.24,1),rnorm(1,-5 - .390,1)), # tpm k = 1
+  mod3_init_mat[,i] = c(rnorm(6,0,8), # tpm k = 1
                         #qlogis(aux_inits[1,2:3]), # init k = 1
-                        c(-6,-1.65) + rnorm(2,0,.1), # init k = 1
-                        .2642 + rnorm(1,0,.1), # pi
+                        c(-6,-1.65) + rnorm(2,0,4), # init k = 1
+                        .2642 + rnorm(1,0,4), # pi
                         # qlogis(.449) + rnorm(1,0,1), # pi
-                        c(-.525,-5) + rnorm(2,0,.1), # init k = 2
+                        c(-.525,-5) + rnorm(2,0,4), # init k = 2
                         # qlogis(c(.37,.001)) + rnorm(2,0,1), # init k = 2
-                        c(rnorm(1,-8+.997,1),rnorm(1,-31.5+27.1,1),
-                          rnorm(1,-5-17,1),rnorm(1,-1.35-.147,1),
-                          rnorm(1,-4+1.24,1),rnorm(1,-1.2-.39,1)), # tpm k = 2
-                        -1.9 + rnorm(1,0,.1), # pi for k = 3
+                        rnorm(6,0,8), # tpm k = 2
+                        -1.9 + rnorm(1,0,4), # pi for k = 3
                         # qlogis(.054) + rnorm(1,0,1), # pi for k = 3
-                        c(-0,-5) + rnorm(2,0,.1), # init k = 3
+                        c(-0,-5) + rnorm(2,0,4), # init k = 3
                         # qlogis(c(.5,.001)) + rnorm(2,0,1), # init k = 3
-                        c(rnorm(1,-2.9+.997,1),rnorm(1,-27.52 + 27.1,1),
-                          rnorm(1,-5-17,1),rnorm(1,-1.95-.147,1),
-                          # rnorm(1,-3.88+1.24,1),rnorm(1,-2-.39,1)), # tpm k = 3
-                          rnorm(1,1.23+1.24,1), rnorm(1,0.26-.39,1)), # tpm k = 3
-                        -.8 + rnorm(1,0,.1), # pi for k = 4
+                        rnorm(6,0,8), # tpm k = 3
+                        -.8 + rnorm(1,0,4), # pi for k = 4
                         # qlogis(.163) + rnorm(1,0,1), # pi for k = 4
-                        c(-5,-.67) + rnorm(2,0,.1), # init k = 4
+                        c(-5,-.67) + rnorm(2,0,4), # init k = 4
                         # qlogis(c(.001,.34)) + rnorm(1,0,1), # init k = 4
-                        c(rnorm(1,-1.55+.997,1),rnorm(1,-26.55+27.1,1),
-                          rnorm(1,-4-17,1),rnorm(1,.42-.147,1),
-                          # rnorm(1,-1.74+1.24,1),rnorm(1,1.37-.39,1)), # tpm k = 4
-                          rnorm(1,-2.18+1.24,1),rnorm(1,-1.1-.39,1)), # tpm k = 4
-                        c(-.997,-27.1,17,.147,-1.24,.39)) # covariates beta
+                        rnorm(6,0,8), # tpm k = 4
+                        c(-.997,-27.1,17,.147,-1.24,.39) + rnorm(6,0,4)) # covariates beta
 }
 
 sourceCpp("mod3/log-lik-semi-roptim.cpp")
@@ -139,4 +129,4 @@ for(i in 1:500){
 t2 = Sys.time()
 t2-t1
 
-saveRDS(mle_vec,paste0("mod3/semiMles_mod3-",opt$seed,".RDS"))
+saveRDS(mle_vec,paste0("mod3/semiMles_mod3-v3-",opt$seed,".RDS"))

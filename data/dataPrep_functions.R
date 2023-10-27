@@ -31,8 +31,10 @@ whales = whales %>% filter(ID != "bw13_193a")
 #### Preparation for Stan ####
 
 # whales_clean = whales %>% mutate(EXPOSURE = case_when(EXPOSURE %in% c("Silent") ~ 0,
-whales_clean = whales %>% mutate(EXPOSURE = case_when(EXPOSURE %in% c("None", "Silent") ~ 0,
-                                                      TRUE ~ 1 ))
+# whales_clean = whales %>% mutate(EXPOSURE = case_when(EXPOSURE %in% c("None", "Silent") ~ 0,
+#                                                       TRUE ~ 1 ))
+whales_clean = whales %>% mutate(EXPOSURE = case_when(phase == "during" ~ 1,
+                                                      TRUE ~ 0 ))
 
 whales_clean$ID = as.integer(as.vector(factor(whales$ID,labels = c(3,1:2,4:37))))
 whales_clean[is.na(whales)] = 999

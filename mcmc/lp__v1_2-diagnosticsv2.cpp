@@ -633,7 +633,7 @@ NumericVector next_point(const NumericVector x_old){
 }
 
 // Generates a new proposal for each one of the parameters of interest and return all of them into a single vector (depends on Rcpp and R APIs)
-NumericVector proposal_dist(const NumericVector theta_star, const int N = 3){
+NumericVector proposal_dist(const NumericVector theta_star, double temp,const int N = 3){
     
     // Initialization of vector parameters corresponding to the state-dependent distributions (the values are provided by theta_star)
     NumericVector mu_duration(N);
@@ -762,29 +762,29 @@ NumericVector proposal_dist(const NumericVector theta_star, const int N = 3){
     for(int i=0; i < N; i++){
 
         // new_mu_duration[i] = R::rnorm(mu_duration[i],step_size_mu_duration[i]);
-        new_mu_duration[i] = std::exp(std::log(mu_duration[i]) + R::rnorm(0.0,step_size_mu_duration[i]));
+        new_mu_duration[i] = std::exp(std::log(mu_duration[i]) + R::rnorm(0.0,step_size_mu_duration[i]*2.38*std::pow(temp/theta_star.size(),0.5)));
         // new_sigma_duration[i] = R::rnorm(sigma_duration[i],step_size_sigma_duration[i]);
-        new_sigma_duration[i] = std::exp(std::log(sigma_duration[i]) + R::rnorm(0.0,step_size_sigma_duration[i]));
+        new_sigma_duration[i] = std::exp(std::log(sigma_duration[i]) + R::rnorm(0.0,step_size_sigma_duration[i]*2.38*std::pow(temp/theta_star.size(),0.5)));
         // new_mu_surface[i] = R::rnorm(mu_surface[i],step_size_mu_surface[i]);
-        new_mu_surface[i] = std::exp(std::log(mu_surface[i]) + R::rnorm(0.0,step_size_mu_surface[i]));
+        new_mu_surface[i] = std::exp(std::log(mu_surface[i]) + R::rnorm(0.0,step_size_mu_surface[i]*2.38*std::pow(temp/theta_star.size(),0.5)));
         // new_sigma_surface[i] = R::rnorm(sigma_surface[i],step_size_sigma_surface[i]);
-        new_sigma_surface[i] = std::exp(std::log(sigma_surface[i]) + R::rnorm(0.0,step_size_sigma_surface[i]));
+        new_sigma_surface[i] = std::exp(std::log(sigma_surface[i]) + R::rnorm(0.0,step_size_sigma_surface[i]*2.38*std::pow(temp/theta_star.size(),0.5)));
         // new_mu_maxDepth[i] = R::rnorm(mu_maxDepth[i],step_size_mu_maxDepth[i]);
-        new_mu_maxDepth[i] = std::exp(std::log(mu_maxDepth[i]) + R::rnorm(0.0,step_size_mu_maxDepth[i]));
+        new_mu_maxDepth[i] = std::exp(std::log(mu_maxDepth[i]) + R::rnorm(0.0,step_size_mu_maxDepth[i]*2.38*std::pow(temp/theta_star.size(),0.5)));
         // new_sigma_maxDepth[i] = R::rnorm(sigma_maxDepth[i],step_size_sigma_maxDepth[i]);
-        new_sigma_maxDepth[i] = std::exp(std::log(sigma_maxDepth[i]) + R::rnorm(0.0,step_size_sigma_maxDepth[i]));
+        new_sigma_maxDepth[i] = std::exp(std::log(sigma_maxDepth[i]) + R::rnorm(0.0,step_size_sigma_maxDepth[i]*2.38*std::pow(temp/theta_star.size(),0.5)));
         // new_mu_step[i] = R::rnorm(mu_step[i],step_size_mu_step[i]);
-        new_mu_step[i] = std::exp(std::log(mu_step[i]) + R::rnorm(0.0,step_size_mu_step[i]));
+        new_mu_step[i] = std::exp(std::log(mu_step[i]) + R::rnorm(0.0,step_size_mu_step[i]*2.38*std::pow(temp/theta_star.size(),0.5)));
         // new_sigma_step[i] = R::rnorm(sigma_step[i],step_size_sigma_step[i]);
-        new_sigma_step[i] = std::exp(std::log(sigma_step[i]) + R::rnorm(0.0,step_size_sigma_step[i]));
+        new_sigma_step[i] = std::exp(std::log(sigma_step[i]) + R::rnorm(0.0,step_size_sigma_step[i]*2.38*std::pow(temp/theta_star.size(),0.5)));
         // new_kappa[i] = R::rnorm(kappa[i],step_size_kappa[i]); // first attempt, random walk was moving towards negative values  
-        new_kappa[i] = std::exp(std::log(kappa[i]) + R::rnorm(0.0,step_size_kappa[i])); // second attempt, now working on the log scale
+        new_kappa[i] = std::exp(std::log(kappa[i]) + R::rnorm(0.0,step_size_kappa[i]*2.38*std::pow(temp/theta_star.size(),0.5))); // second attempt, now working on the log scale
         // new_a[i] = R::rnorm(a[i],step_size_a[i]); // first attempt, random walk was moving towards negative values
-        new_a[i] = std::exp(std::log(a[i]) + R::rnorm(0.0,step_size_a[i])); // second attempt, now working on the log scale
+        new_a[i] = std::exp(std::log(a[i]) + R::rnorm(0.0,step_size_a[i]*2.38*std::pow(temp/theta_star.size(),0.5))); // second attempt, now working on the log scale
         // new_b[i] = R::rnorm(b[i],step_size_b[i]); // first attempt, random walk was moving towards negative values
-        new_b[i] = std::exp(std::log(b[i]) + R::rnorm(0.0,step_size_b[i])); // second attempt, now working on the log scale
+        new_b[i] = std::exp(std::log(b[i]) + R::rnorm(0.0,step_size_b[i]*2.38*std::pow(temp/theta_star.size(),0.5))); // second attempt, now working on the log scale
         // new_lambda[i] = R::rnorm(lambda[i],step_size_lambda[i]); // first attempt, random walk was moving towards negative values
-        new_lambda[i] = std::exp(std::log(lambda[i]) + R::rnorm(0.0,step_size_lambda[i])); // second attempt, now working on the log scale
+        new_lambda[i] = std::exp(std::log(lambda[i]) + R::rnorm(0.0,step_size_lambda[i]*2.38*std::pow(temp/theta_star.size(),0.5))); // second attempt, now working on the log scale
         new_theta[i] = R::runif(0,1);
 
         // // Hasting ratio
@@ -906,7 +906,7 @@ List pt_cw_M_target_posterior(const List list_data,
             // For the chain temp we select the its corresponding matrix where samples are allocated 
             NumericMatrix aux_X = X[temp];
             // Generation of new proposal for the parameters
-            NumericVector aux_Y_n = proposal_dist(aux_X(_,i));
+            NumericVector aux_Y_n = proposal_dist(aux_X(_,i),temp_vector[temp]);
             // Auxiliary vector for the component-wise step for each parameter
             NumericVector Y_n(init.length());
             
@@ -1379,7 +1379,6 @@ double log_lik_stdVector(const int N,  // Number of hidden states
 }
 
 // (Unnormalilzed) log-posterior of theta_star given data
-// [[Rcpp::export]]
 double lp__stdVector(const int N,
                     const int n,
                     const int n_ind,
@@ -1660,9 +1659,6 @@ struct ComponentWiseStep : public Worker
     const double the_temp; // the temperature related to the tempered version of the target
     const double max_temp;
     const RVector<double> log_U; // log-uniform samples
-    // double log_alpha;
-    // double log_ratio;
-    // double the_target_at_proposal; // value fo the proposal at the tempered target
     
     RVector<double> output; // output vector 
 
@@ -2192,6 +2188,7 @@ void vector_aggregator(NumericMatrix Y,
 List rcpp_parallel_pt_cw_M_target_posterior(const List list_data, 
                         const int nsim,  
                         NumericVector init,
+                        NumericMatrix init_tempered,
                         NumericVector temp_vector,
                         const int N,
                         const int n,
@@ -2212,6 +2209,7 @@ List rcpp_parallel_pt_cw_M_target_posterior(const List list_data,
                         const  NumericVector x_step,
                         const  NumericVector x_angle,
                         const  NumericVector x_headVar,
+                        int within_temp,
                         bool display_progress=true){
     
     // Progress p(nsim*temp_vector.size()*init.size(), display_progress);
@@ -2226,9 +2224,25 @@ List rcpp_parallel_pt_cw_M_target_posterior(const List list_data,
     for(int i = 0; i < temp_vector.size(); ++i){
         X[i] = createMatrix(init.size(),nsim+1);
         NumericMatrix aux_X = X[i];
-        aux_X(_,0) = init;
+        if(i == 0){
+            aux_X(_,0) = init;
+        } else if (i > 0){
+            aux_X(_,0) = init_tempered(_,i-1);
+        }
     }
+    // for(int i = 0; i < temp_vector.size(); ++i){
+    //     X[i] = createMatrix(init.size(),nsim+1);
+    //     NumericMatrix aux_X = X[i];
+    //     aux_X(_,0) = init;
+    // }
 
+
+    IntegerVector swap(nsim + 1);
+    IntegerMatrix path_init(nsim + 1,temp_vector.size());
+    IntegerVector swap_proposal(nsim + 1);
+    for(int i = 0; i < temp_vector.size(); i++){
+        path_init(0,i) = i+1;
+    }
     // We will generate nsim simulations for each chain
     for(int i=0; i<nsim; ++i){
         // Part of the progress bar - it's supposed to retun -1.0 if the process is aborted
@@ -2240,120 +2254,7 @@ List rcpp_parallel_pt_cw_M_target_posterior(const List list_data,
             // For the chain temp we select the its corresponding matrix where samples are allocated 
             NumericMatrix aux_X = X[temp];
             // Generation of new proposal for the parameters
-            NumericVector aux_Y_n = proposal_dist(aux_X(_,i));
-
-            // NumericVector aux_Y_n(init.size());
-
-            // // Initialization of vectors where new proposal for the initial state dist and the tpms rows will be allocated
-            // NumericVector new_init(N);
-            // NumericVector new_tpm1(N);
-            // NumericVector new_tpm2(N);
-            // NumericVector new_tpm3(N);
-
-            // // step size for the Metropolis algorithm for each one of the state-dependent distribution parameters
-            // NumericVector step_size_mu_duration = {.008,.008,.008};
-            // NumericVector step_size_sigma_duration = {.01,.01,.01};
-            // NumericVector step_size_mu_surface = {.01,.01,.01};
-            // NumericVector step_size_sigma_surface = {.05,.05,.05};
-            // NumericVector step_size_mu_maxDepth = {.01,.01,.01};
-            // NumericVector step_size_sigma_maxDepth = {.01,.01,.01};
-            // NumericVector step_size_mu_step = {.01,.01,.01};
-            // NumericVector step_size_sigma_step = {.01,.01,.01};
-            // NumericVector step_size_kappa = {.08,.08,.08}; // third attempt, now working on the log scale
-            // NumericVector step_size_a = {.05,.05,.05}; // second attempt, now working on the log scale
-            // NumericVector step_size_b = {.05,.05,.05};
-            // NumericVector step_size_lambda = {.05,.05,.05}; // second attempt, now working on the log scale    
-
-            // for(int j=0; j < N; j++){
-
-            //     aux_Y_n[j+6] = std::exp(std::log(aux_X(j+6,i)) + R::rnorm(0.0,step_size_mu_duration[j]));
-            //     aux_Y_n[j+9] = std::exp(std::log(aux_X(j+9,i)) + R::rnorm(0.0,step_size_sigma_duration[j]));
-            //     aux_Y_n[j+12] = std::exp(std::log(aux_X(j+12,i)) + R::rnorm(0.0,step_size_mu_surface[j]));
-            //     aux_Y_n[j+15] = std::exp(std::log(aux_X(j+15,i)) + R::rnorm(0.0,step_size_sigma_surface[j]));
-            //     aux_Y_n[j+18] = std::exp(std::log(aux_X(j+18,i)) + R::rnorm(0.0,step_size_mu_maxDepth[j]));
-            //     aux_Y_n[j+21] = std::exp(std::log(aux_X(j+21,i)) + R::rnorm(0.0,step_size_sigma_maxDepth[j]));
-            //     aux_Y_n[j+24] = std::exp(std::log(aux_X(j+24,i)) + R::rnorm(0.0,step_size_mu_step[j]));
-            //     aux_Y_n[j+27] = std::exp(std::log(aux_X(j+27,i)) + R::rnorm(0.0,step_size_sigma_step[j]));
-            //     aux_Y_n[j+30] = std::exp(std::log(aux_X(j+30,i)) + R::rnorm(0.0,step_size_kappa[j]));
-            //     aux_Y_n[j+33] = std::exp(std::log(aux_X(j+33,i)) + R::rnorm(0.0,step_size_a[j]));
-            //     aux_Y_n[j+36] = std::exp(std::log(aux_X(j+36,i)) + R::rnorm(0.0,step_size_b[j]));
-            //     aux_Y_n[j+39] = std::exp(std::log(aux_X(j+39,i)) + R::rnorm(0.0,step_size_lambda[j]));
-            //     aux_Y_n[j+48] = R::runif(0,1);
-            // }
-
-            // // Proposals for initial state distribution and tpm rows
-            // NumericVector dummy_vec = NumericVector::create(1/3,1/3,1/3);
-            // NumericVector aux_new_init(N);
-            // NumericVector aux_new_tpm1(N);
-            // NumericVector aux_new_tpm2(N);
-            // NumericVector aux_new_tpm3(N);
-
-            // for(int j=0; j< dummy_vec.size(); j++){
-            //     aux_new_init[j] =  -std::log(R::runif(0,1));    
-            //     aux_new_tpm1[j] =  -std::log(R::runif(0,1));    
-            //     aux_new_tpm2[j] =  -std::log(R::runif(0,1));    
-            //     aux_new_tpm3[j] =  -std::log(R::runif(0,1));
-            //     // if(temp == 0){
-            //     //     Rprintf("sim for tpm1, temp %i is %f \n",temp,aux_new_tpm1[j]);
-            //     //     Rprintf("sim for tpm2, temp %i is %f \n",temp,aux_new_tpm2[j]);
-            //     //     Rprintf("sim for tpm3, temp %i is %f \n",temp,aux_new_tpm3[j]);
-            //     //     Rprintf("sim for init, temp %i is %f \n",temp,aux_new_init[j]);
-
-            //     // }
-
-            // }
-
-            // double aux_sum_init = 0.0;
-            // double aux_sum_tpm1 = 0.0;
-            // double aux_sum_tpm2 = 0.0;
-            // double aux_sum_tpm3 = 0.0;
-
-            // for(int j=0; j < dummy_vec.size(); j++){
-            //     aux_sum_init += aux_new_init[j]; 
-            //     aux_sum_tpm1 += aux_new_tpm1[j]; 
-            //     aux_sum_tpm2 += aux_new_tpm2[j]; 
-            //     aux_sum_tpm3 += aux_new_tpm3[j]; 
-            // }
-            // for(int j=0; j < dummy_vec.size();j++){
-            //     new_init[j] = aux_new_init[j]/aux_sum_init;
-            //     new_tpm1[j] = aux_new_tpm1[j]/aux_sum_tpm1;
-            //     new_tpm2[j] = aux_new_tpm2[j]/aux_sum_tpm2;
-            //     new_tpm3[j] = aux_new_tpm3[j]/aux_sum_tpm3;
-            //     // if(temp == 0 && i ==10){
-            //     //     Rprintf("prop for tpm1, temp %i is %f \n",temp,new_tpm1[j]);
-            //     //     Rprintf("prop for tpm2, temp %i is %f \n",temp,new_tpm2[j]);
-            //     //     Rprintf("prop for tpm3, temp %i is %f \n",temp,new_tpm3[j]);
-            //     //     Rprintf("prop for init, temp %i is %f \n",temp,new_init[j]);
-
-            //     // }
-            // }
-
-            // // proposed tpm values
-            // aux_Y_n[44] = new_tpm1[1-1];
-            // aux_Y_n[1-1] = new_tpm1[2-1];
-            // aux_Y_n[2-1] = new_tpm1[3-1];
-            
-            // aux_Y_n[3-1] = new_tpm2[1-1];
-            // aux_Y_n[45] = new_tpm2[2-1];
-            // aux_Y_n[4-1] = new_tpm2[3-1];
-            
-            // aux_Y_n[5-1] = new_tpm3[1-1];
-            // aux_Y_n[6-1] = new_tpm3[2-1];
-            // aux_Y_n[46] = new_tpm3[3-1];
-
-            // // proposed init values
-            // aux_Y_n[42] = new_init[2-1];
-            // aux_Y_n[43] = new_init[3-1];
-            // aux_Y_n[47] = new_init[1-1];
-
-
-
-            // Auxiliary vector for the component-wise step for each parameter            
-            // NumericVector Y_n(init.length());
-            
-            // for(int id = 0; id <  init.length(); id++){
-            //     Y_n[id] = aux_X(id,i);
-            // }
+            NumericVector aux_Y_n = proposal_dist(aux_X(_,i),temp_vector[temp]);
 
             // tempered target at current iteration
             // double target_at_X_i = target_tau(list_data, aux_X(_,i),temp_vector[temp],temp_vector[temp_vector.size()-1]);
@@ -2378,119 +2279,6 @@ List rcpp_parallel_pt_cw_M_target_posterior(const List list_data,
                     x_angle,
                     x_headVar,
                     aux_X(_,i))/temp_vector[temp];
-
-            // component-wise for tpms and initial distribution
-            //  component-wise step for tpm1 (tpm row 1)
-            // p.increment();
-            // double log_U_tpm1 = log(R::runif(0,1));
-
-            // Y_n[44] =  aux_Y_n[44];
-            // Y_n[1-1] =  aux_Y_n[1-1];
-            // Y_n[2-1] =  aux_Y_n[2-1];
-
-            // double log_alpha_tpm1 = 0.0;
-            // log_alpha_tpm1 += target_tau(list_data, Y_n, temp_vector[temp],temp_vector[temp_vector.size()-1]);
-            // log_alpha_tpm1 -= target_at_X_i;
-            // double log_ratio_tpm1 = min(NumericVector::create(0,log_alpha_tpm1));
-            
-            // if(log_U_tpm1 <= log_ratio_tpm1){
-            //     aux_X(44,i+1) = aux_Y_n[44];
-            //     aux_X(1-1,i+1) = aux_Y_n[1-1];
-            //     aux_X(2-1,i+1) = aux_Y_n[2-1];
-            // } else {
-            //     aux_X(44,i+1) = aux_X(44,i);
-            //     aux_X(1-1,i+1) = aux_X(1-1,i);
-            //     aux_X(2-1,i+1) = aux_X(2-1,i);
-            // }
-
-            // // return the value we had before to recycle this vector
-            // Y_n[44] =  aux_X(44,i);
-            // Y_n[1-1] =  aux_X(1-1,i);
-            // Y_n[2-1] =  aux_X(2-1,i);
-            
-            // //  component-wise step for tpm2 (tpm row 2)
-            // // p.increment();
-            // double log_U_tpm2 = log(R::runif(0,1));
-
-            // Y_n[3-1] =  aux_Y_n[3-1];
-            // Y_n[45] =  aux_Y_n[45];
-            // Y_n[4-1] =  aux_Y_n[4-1];
-
-            // double log_alpha_tpm2 = 0.0;
-            // log_alpha_tpm2 += target_tau(list_data, Y_n, temp_vector[temp],temp_vector[temp_vector.size()-1]);
-            // log_alpha_tpm2 -= target_at_X_i;
-            // double log_ratio_tpm2 = min(NumericVector::create(0,log_alpha_tpm2));
-            
-            // if(log_U_tpm2 <= log_ratio_tpm2){
-            //     aux_X(3-1,i+1) = aux_Y_n[3-1];
-            //     aux_X(45,i+1) = aux_Y_n[45];
-            //     aux_X(4-1,i+1) = aux_Y_n[4-1];
-            // } else {
-            //     aux_X(3-1,i+1) = aux_X(3-1,i);
-            //     aux_X(45,i+1) = aux_X(45,i);
-            //     aux_X(4-1,i+1) = aux_X(4-1,i);
-            // }
-
-            // // return the value we had before to recycle this vector
-            // Y_n[3-1] =  aux_X(3-1,i);
-            // Y_n[45] =  aux_X(45,i);
-            // Y_n[4-1] =  aux_X(4-1,i);
-
-            // //  component-wise step for tpm3 (tpm row 3)
-            // // p.increment();
-            // double log_U_tpm3 = log(R::runif(0,1));
-
-            // Y_n[5-1] =  aux_Y_n[5-1];
-            // Y_n[6-1] =  aux_Y_n[6-1];
-            // Y_n[46] =  aux_Y_n[46];
-
-            // double log_alpha_tpm3 = 0.0;
-            // log_alpha_tpm3 += target_tau(list_data, Y_n, temp_vector[temp],temp_vector[temp_vector.size()-1]);
-            // log_alpha_tpm3 -= target_at_X_i;
-            // double log_ratio_tpm3 = min(NumericVector::create(0,log_alpha_tpm3));
-            
-            // if(log_U_tpm3 <= log_ratio_tpm3){
-            //     aux_X(5-1,i+1) = aux_Y_n[5-1];
-            //     aux_X(6-1,i+1) = aux_Y_n[6-1];
-            //     aux_X(46,i+1) = aux_Y_n[46];
-            // } else {
-            //     aux_X(5-1,i+1) = aux_X(5-1,i);
-            //     aux_X(6-1,i+1) = aux_X(6-1,i);
-            //     aux_X(46,i+1) = aux_X(46,i);
-            // }
-
-            // // return the value we had before to recycle this vector
-            // Y_n[5-1] =  aux_X(5-1,i);
-            // Y_n[6-1] =  aux_X(6-1,i);
-            // Y_n[46] =  aux_X(46,i);
-
-            // //  component-wise step for initial state distribution
-            // // p.increment();
-            // double log_U_initd = log(R::runif(0,1));
-
-            // Y_n[42] =  aux_Y_n[42];
-            // Y_n[43] =  aux_Y_n[43];
-            // Y_n[47] = aux_Y_n[47];
-
-            // double log_alpha_initd = 0.0;
-            // log_alpha_initd += target_tau(list_data, Y_n, temp_vector[temp],temp_vector[temp_vector.size()-1]);
-            // log_alpha_initd -= target_at_X_i;
-            // double log_ratio_initd = min(NumericVector::create(0,log_alpha_initd));
-            
-            // if(log_U_initd <= log_ratio_initd){
-            //     aux_X(42,i+1) = aux_Y_n[42];
-            //     aux_X(43,i+1) = aux_Y_n[43];
-            //     aux_X(47,i+1) = aux_Y_n[47];
-            // } else {
-            //     aux_X(42,i+1) = aux_X(42,i);
-            //     aux_X(43,i+1) = aux_X(43,i);
-            //     aux_X(47,i+1) = aux_X(47,i);
-            // }
-
-            // // return the value we had before to recycle this vector
-            // Y_n[42] =  aux_X(42,i);
-            // Y_n[43] =  aux_X(43,i);
-            // Y_n[47] =  aux_X(47,i);
 
             // component-wise for state-dependent parameters  
 
@@ -2534,10 +2322,6 @@ List rcpp_parallel_pt_cw_M_target_posterior(const List list_data,
                 vec_log_U[j] = log(R::runif(0,1));
             }
             
-            // Rprintf("log_U for tpm1, temp %i is %f \n",temp,vec_log_U[2]);
-            // Rprintf("log_U for tpm2, temp %i is %f \n",temp,vec_log_U[3]);
-            // Rprintf("log_U for tpm3, temp %i is %f \n",temp,vec_log_U[4]);
-            // Rprintf("log_U for init, temp %i is %f \n",temp,vec_log_U[5]);
             // Vector where the new sample generated from the parallelization will be stored
             NumericVector output_parallel(init.size());
             // Using vector_aggregator to get new samples from state-dependent distributions
@@ -2590,24 +2374,6 @@ List rcpp_parallel_pt_cw_M_target_posterior(const List list_data,
                                                     output_parallel,
                                                     aux_X(_,i),vec_log_U,target_at_X_i,temp_vector[temp],temp_vector[temp_vector.size()-1],init.length()-3,init.length());
 
-            // for(int j = 6; j < (init.length()-9); j++){
-            //     aux_X(j,i+1) = aux_X(j,i);
-            // }                            
-
-            // for(int j = (init.length()-3); j < init.length(); j++){
-            //     aux_X(j,i+1) = aux_X(j,i);
-            // }
-
-            // for(int j = 0; j < 6; j++){
-            //     aux_X(j,i+1) = output_parallel[j];
-            // }
-
-            // for(int j = (init.length()-9); j < (init.length()-3); j++){
-            //     aux_X(j,i+1) = output_parallel[j];
-            // }
-
-            
-
             for(int j = 0; j < init.length(); j++){
                 aux_X(j,i+1) = output_parallel[j];
             }
@@ -2616,108 +2382,132 @@ List rcpp_parallel_pt_cw_M_target_posterior(const List list_data,
 
         }
 
-        // Choose randomly one of the chains
-        int j = floor(R::runif(0,1)*(temp_vector.size()-1));
-        int k = j + 1; // Proposed Swap;
-        double log_U_swap = log(R::runif(0,1));
 
-        // Auxiliary matrices where we will extract the values to be swapped
-        NumericMatrix X_j = X[j];
-        NumericMatrix X_k = X[k];
-        // double ratio = target_tau(list_data, X_j(_,i+1), k,temp_vector[temp_vector.size()-1]) + target_tau(list_data, X_k(_,i+1), j,temp_vector[temp_vector.size()-1]) - 
-        //                 (target_tau(list_data, X_j(_,i+1), j,temp_vector[temp_vector.size()-1]) + target_tau(list_data, X_k(_,i+1), k,temp_vector[temp_vector.size()-1]));
-        double ratio = 0.0;
-        ratio += lp__stdVector(N,
-                    n,
-                    n_ind,
-                    ID_init,
-                    ID,
-                    x_duration_init,
-                    x_surface_init,
-                    x_maxDepth_init,
-                    x_lunges_init,
-                    x_step_init,
-                    x_angle_init,
-                    x_headVar_init,
-                    x_duration,
-                    x_surface,
-                    x_maxDepth,
-                    x_lunges,
-                    x_step,
-                    x_angle,
-                    x_headVar,
-                    X_j(_,i+1))/temp_vector[k];
+        if(within_temp % (i+1) == 0){
+            // Choose randomly one of the chains
+            int j = floor(R::runif(0,1)*(temp_vector.size()-1));
+            int k = j + 1; // Proposed Swap;
+            double log_U_swap = log(R::runif(0,1));
 
-        ratio += lp__stdVector(N,
-                    n,
-                    n_ind,
-                    ID_init,
-                    ID,
-                    x_duration_init,
-                    x_surface_init,
-                    x_maxDepth_init,
-                    x_lunges_init,
-                    x_step_init,
-                    x_angle_init,
-                    x_headVar_init,
-                    x_duration,
-                    x_surface,
-                    x_maxDepth,
-                    x_lunges,
-                    x_step,
-                    x_angle,
-                    x_headVar,
-                    X_k(_,i+1))/temp_vector[j];
+            // Auxiliary matrices where we will extract the values to be swapped
+            NumericMatrix X_j = X[j];
+            NumericMatrix X_k = X[k];
+            // double ratio = target_tau(list_data, X_j(_,i+1), k,temp_vector[temp_vector.size()-1]) + target_tau(list_data, X_k(_,i+1), j,temp_vector[temp_vector.size()-1]) - 
+            //                 (target_tau(list_data, X_j(_,i+1), j,temp_vector[temp_vector.size()-1]) + target_tau(list_data, X_k(_,i+1), k,temp_vector[temp_vector.size()-1]));
+            
+            double ratio = 0.0;
+            ratio += lp__stdVector(N,
+                        n,
+                        n_ind,
+                        ID_init,
+                        ID,
+                        x_duration_init,
+                        x_surface_init,
+                        x_maxDepth_init,
+                        x_lunges_init,
+                        x_step_init,
+                        x_angle_init,
+                        x_headVar_init,
+                        x_duration,
+                        x_surface,
+                        x_maxDepth,
+                        x_lunges,
+                        x_step,
+                        x_angle,
+                        x_headVar,
+                        X_j(_,i+1))/temp_vector[k];
 
-        ratio -= lp__stdVector(N,
-                    n,
-                    n_ind,
-                    ID_init,
-                    ID,
-                    x_duration_init,
-                    x_surface_init,
-                    x_maxDepth_init,
-                    x_lunges_init,
-                    x_step_init,
-                    x_angle_init,
-                    x_headVar_init,
-                    x_duration,
-                    x_surface,
-                    x_maxDepth,
-                    x_lunges,
-                    x_step,
-                    x_angle,
-                    x_headVar,
-                    X_j(_,i+1))/temp_vector[j];
+            ratio += lp__stdVector(N,
+                        n,
+                        n_ind,
+                        ID_init,
+                        ID,
+                        x_duration_init,
+                        x_surface_init,
+                        x_maxDepth_init,
+                        x_lunges_init,
+                        x_step_init,
+                        x_angle_init,
+                        x_headVar_init,
+                        x_duration,
+                        x_surface,
+                        x_maxDepth,
+                        x_lunges,
+                        x_step,
+                        x_angle,
+                        x_headVar,
+                        X_k(_,i+1))/temp_vector[j];
 
-        ratio -= lp__stdVector(N,
-                    n,
-                    n_ind,
-                    ID_init,
-                    ID,
-                    x_duration_init,
-                    x_surface_init,
-                    x_maxDepth_init,
-                    x_lunges_init,
-                    x_step_init,
-                    x_angle_init,
-                    x_headVar_init,
-                    x_duration,
-                    x_surface,
-                    x_maxDepth,
-                    x_lunges,
-                    x_step,
-                    x_angle,
-                    x_headVar,
-                    X_k(_,i+1))/temp_vector[k];
+            ratio -= lp__stdVector(N,
+                        n,
+                        n_ind,
+                        ID_init,
+                        ID,
+                        x_duration_init,
+                        x_surface_init,
+                        x_maxDepth_init,
+                        x_lunges_init,
+                        x_step_init,
+                        x_angle_init,
+                        x_headVar_init,
+                        x_duration,
+                        x_surface,
+                        x_maxDepth,
+                        x_lunges,
+                        x_step,
+                        x_angle,
+                        x_headVar,
+                        X_j(_,i+1))/temp_vector[j];
 
+            ratio -= lp__stdVector(N,
+                        n,
+                        n_ind,
+                        ID_init,
+                        ID,
+                        x_duration_init,
+                        x_surface_init,
+                        x_maxDepth_init,
+                        x_lunges_init,
+                        x_step_init,
+                        x_angle_init,
+                        x_headVar_init,
+                        x_duration,
+                        x_surface,
+                        x_maxDepth,
+                        x_lunges,
+                        x_step,
+                        x_angle,
+                        x_headVar,
+                        X_k(_,i+1))/temp_vector[k];
 
-        if(log_U_swap  < ratio){
-            NumericVector tmpval = X_j(_,i+1);
-            X_j(_,i+1) = X_k(_,i+1);
-            X_k(_,i+1) = tmpval; // Accept Swap;
+            for(int chain = 0; chain < temp_vector.size(); chain++){
+                path_init(i+1,chain) = path_init(i,chain);
+            }
+            
+            swap_proposal[i+1] = j+1; // +1 is necessary to match the actual chain id proposed for swapping
+            if(log_U_swap  < ratio){
+                NumericVector tmpval = X_j(_,i+1);
+                X_j(_,i+1) = X_k(_,i+1);
+                X_k(_,i+1) = tmpval; // Accept Swap;
+                swap[i+1] += 1;
+                for(int id = 0 ; id < temp_vector.size(); id++){
+                    if(j + 1 == path_init(i,id)){
+                        path_init(i+1,id) += 1;
+                    }
+                    if(k + 1 == path_init(i,id)){
+                        path_init(i+1,id) -= 1;
+                    }
+                }
+                // if(j+1 == path_init[i]){
+                //     path_init[i+1] = k+1;
+                // }
+                // if(k+1 == path_init[i]){
+                //     path_init[i+1] = j+1;
+                // }
+            }
         }
     }
 
-    return X;
+    List L = List::create(_["chains"] = X , _["swap"] = swap, _["swap_proposal"]=swap_proposal, _["path_init"]=path_init);
+    return L;
 } 

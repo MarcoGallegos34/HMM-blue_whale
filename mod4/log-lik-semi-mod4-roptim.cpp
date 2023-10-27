@@ -214,7 +214,7 @@ struct SemiMleExtended : public Functor {
     // theta[3-1] = 1/(1+exp(-theta_raw2[2-1]));
     // theta[4-1] = 1/(1+exp(-theta_raw2[3-1]));
     // theta[1-1] = 1 - (theta[2-1] + theta[3-1] + theta[4-1]);
-    theta[1-1] = 1/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
+    theta[1-1] =                    1/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
     theta[2-1] = exp(theta_raw2[1-1])/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
     theta[3-1] = exp(theta_raw2[2-1])/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
     theta[4-1] = exp(theta_raw2[3-1])/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
@@ -248,7 +248,7 @@ struct SemiMleExtended : public Functor {
     // init(1-1,2-1) = exp(init_raw[1-1])/(1+exp(init_raw[1-1]));
     // init(1-1,3-1) = exp(init_raw[2-1])/(1+exp(init_raw[2-1]));
     // init(1-1,1-1) = 1 - (init(1-1,2-1) + init(1-1,3-1));        
-    init(1-1,1-1) = 1/(1 + exp(init_raw[1-1]) + exp(init_raw[2-1]));
+    init(1-1,1-1) =                  1/(1 + exp(init_raw[1-1]) + exp(init_raw[2-1]));
     init(1-1,2-1) = exp(init_raw[1-1])/(1 + exp(init_raw[1-1]) + exp(init_raw[2-1]));
     init(1-1,3-1) = exp(init_raw[2-1])/(1 + exp(init_raw[1-1]) + exp(init_raw[2-1]));
         
@@ -256,7 +256,7 @@ struct SemiMleExtended : public Functor {
     // init(2-1,2-1) = 1/(1+exp(-init_raw2[1-1]));
     // init(2-1,3-1) = 1/(1+exp(-init_raw2[2-1]));
     // init(2-1,1-1) = 1 - (init(2-1,2-1) + init(2-1,3-1));
-    init(2-1,1-1) = 1/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
+    init(2-1,1-1) =                   1/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
     init(2-1,2-1) = exp(init_raw2[1-1])/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
     init(2-1,3-1) = exp(init_raw2[2-1])/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
     
@@ -265,7 +265,7 @@ struct SemiMleExtended : public Functor {
     // init(3-1,2-1) = 1/(1+exp(-init_raw3[1-1]));
     // init(3-1,3-1) = 1/(1+exp(-init_raw3[2-1]));
     // init(3-1,1-1) = 1 - (init(3-1,2-1) + init(3-1,3-1));
-    init(3-1,1-1) = 1/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
+    init(3-1,1-1) =                   1/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
     init(3-1,2-1) = exp(init_raw3[1-1])/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
     init(3-1,3-1) = exp(init_raw3[2-1])/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
 
@@ -274,7 +274,7 @@ struct SemiMleExtended : public Functor {
     // init(4-1,2-1) = 1/(1+exp(-init_raw4[1-1]));
     // init(4-1,3-1) = 1/(1+exp(-init_raw4[2-1]));
     // init(4-1,1-1) = 1 - (init(4-1,2-1) + init(4-1,3-1));
-    init(4-1,1-1) = 1/(1 + exp(init_raw4[1-1] + init_raw4[2-1]));
+    init(4-1,1-1) =                   1/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
     init(4-1,2-1) = exp(init_raw4[1-1])/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
     init(4-1,3-1) = exp(init_raw4[2-1])/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
 
@@ -562,4 +562,69 @@ double semiMleExtended_bfgs(
 //   opt.print();
   return opt.value();
 //   return opt.par();
+}
+
+// [[Rcpp::export]]
+arma::Col<double> semiMleExtended_bfgs_par(    
+    const int K,
+    const int N,
+    const int n,
+    const int n_ind,
+    arma::Col<int> ID_init,
+    const arma::Col<int> ID,
+    const arma::Col<double> x_duration_init,
+    const arma::Col<double> x_surface_init,
+    const arma::Col<double> x_maxDepth_init,
+    const arma::Col<int> x_lunges_init,
+    const arma::Col<double> x_step_init,
+    const arma::Col<double> x_angle_init,
+    const arma::Col<double> x_headVar_init,
+    const arma::Col<int> x_exposure_init,
+    const arma::Col<double> x_duration,
+    const arma::Col<double> x_surface,
+    const arma::Col<double> x_maxDepth,
+    const arma::Col<int> x_lunges,
+    const arma::Col<double> x_step,
+    const arma::Col<double> x_angle,
+    const arma::Col<double> x_headVar,
+    const arma::Col<int> x_exposure,
+    const arma::Col<double> estimate,
+    arma::Col<double> theta_star
+)
+{
+  SemiMleExtended sm(
+    K,
+    N,
+    n,
+    n_ind,
+    ID_init,
+    ID,
+    x_duration_init,
+    x_surface_init,
+    x_maxDepth_init,
+    x_lunges_init,
+    x_step_init,
+    x_angle_init,
+    x_headVar_init,
+    x_exposure_init,
+    x_duration,
+    x_surface,
+    x_maxDepth,
+    x_lunges,
+    x_step,
+    x_angle,
+    x_headVar,
+    x_exposure,
+    estimate);
+
+  Roptim<SemiMleExtended> opt("BFGS");
+  opt.control.trace = 1;
+  opt.control.maxit = 30000;
+  // opt.set_hessian(true);
+  // arma::vec x = {-1.2, 1};
+  opt.minimize(sm, theta_star);
+  Rcpp::Rcout << "-------------------------" << std::endl;
+//   opt.print();
+//   return opt.value();
+  return opt.par();
 }

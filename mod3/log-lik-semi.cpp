@@ -142,40 +142,58 @@ double log_likelihood_mod3_semi(const List list_data, NumericVector theta_star){
   // from here the values will be extracted from theta_star, not estimate
 
     int ll = 36 + 1;
+    // int ll = 1;
     // # Creation parameters initial distribution
     arma::Col<double> init_raw = {theta_star[43-ll], theta_star[44-ll]}; // pi parameters
 
     // # weights pi_
     arma::Col<double> theta(K); //   estimate[45-ll];  
     arma::Col<double> theta_raw2 = {theta_star[45-ll],theta_star[54-ll],theta_star[63-ll]};
-    theta[2-1] = 1/(1+exp(-theta_raw2[1-1]));
-    theta[3-1] = 1/(1+exp(-theta_raw2[2-1]));
-    theta[4-1] = 1/(1+exp(-theta_raw2[3-1]));
-    theta[1-1] = 1 - (theta[2-1] + theta[3-1] + theta[4-1]);
+    // theta[2-1] = 1/(1+exp(-theta_raw2[1-1]));
+    // theta[3-1] = 1/(1+exp(-theta_raw2[2-1]));
+    // theta[4-1] = 1/(1+exp(-theta_raw2[3-1]));
+    // theta[1-1] = 1 - (theta[2-1] + theta[3-1] + theta[4-1]);    
+    theta[1-1] = 1/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
+    theta[2-1] = exp(theta_raw2[1-1])/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
+    theta[3-1] = exp(theta_raw2[2-1])/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
+    theta[4-1] = exp(theta_raw2[3-1])/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
     
   // return theta;
   
     // # init
     arma::mat init(K,N);
-    init(1-1,2-1) = exp(init_raw[1-1])/(1+exp(init_raw[1-1]));
-    init(1-1,3-1) = exp(init_raw[2-1])/(1+exp(init_raw[2-1]));
-    init(1-1,1-1) = 1 - (init(1-1,2-1) + init(1-1,3-1));
+    // init(1-1,2-1) = exp(init_raw[1-1])/(1+exp(init_raw[1-1]));
+    // init(1-1,3-1) = exp(init_raw[2-1])/(1+exp(init_raw[2-1]));
+    // init(1-1,1-1) = 1 - (init(1-1,2-1) + init(1-1,3-1));        
+    init(1-1,1-1) = 1/(1 + exp(init_raw[1-1]) + exp(init_raw[2-1]));
+    init(1-1,2-1) = exp(init_raw[1-1])/(1 + exp(init_raw[1-1]) + exp(init_raw[2-1]));
+    init(1-1,3-1) = exp(init_raw[2-1])/(1 + exp(init_raw[1-1]) + exp(init_raw[2-1]));
         
     arma::Col<double> init_raw2 = {theta_star[46-ll],theta_star[47-ll]};
-    init(2-1,2-1) = 1/(1+exp(-init_raw2[1-1]));
-    init(2-1,3-1) = 1/(1+exp(-init_raw2[2-1]));
-    init(2-1,1-1) = 1 - (init(2-1,2-1) + init(2-1,3-1));
+    // init(2-1,2-1) = 1/(1+exp(-init_raw2[1-1]));
+    // init(2-1,3-1) = 1/(1+exp(-init_raw2[2-1]));
+    // init(2-1,1-1) = 1 - (init(2-1,2-1) + init(2-1,3-1));
+    init(2-1,1-1) = 1/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
+    init(2-1,2-1) = exp(init_raw2[1-1])/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
+    init(2-1,3-1) = exp(init_raw2[2-1])/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
     
     
     arma::Col<double> init_raw3 = {theta_star[55-ll],theta_star[56-ll]};
-    init(3-1,2-1) = 1/(1+exp(-init_raw3[1-1]));
-    init(3-1,3-1) = 1/(1+exp(-init_raw3[2-1]));
-    init(3-1,1-1) = 1 - (init(3-1,2-1) + init(3-1,3-1));
-    
+    // init(3-1,2-1) = 1/(1+exp(-init_raw3[1-1]));
+    // init(3-1,3-1) = 1/(1+exp(-init_raw3[2-1]));
+    // init(3-1,1-1) = 1 - (init(3-1,2-1) + init(3-1,3-1));
+    init(3-1,1-1) = 1/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
+    init(3-1,2-1) = exp(init_raw3[1-1])/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
+    init(3-1,3-1) = exp(init_raw3[2-1])/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
+
+
     arma::Col<double> init_raw4 = {theta_star[64-ll],theta_star[65-ll]};
-    init(4-1,2-1) = 1/(1+exp(-init_raw4[1-1]));
-    init(4-1,3-1) = 1/(1+exp(-init_raw4[2-1]));
-    init(4-1,1-1) = 1 - (init(4-1,2-1) + init(4-1,3-1));
+    // init(4-1,2-1) = 1/(1+exp(-init_raw4[1-1]));
+    // init(4-1,3-1) = 1/(1+exp(-init_raw4[2-1]));
+    // init(4-1,1-1) = 1 - (init(4-1,2-1) + init(4-1,3-1));
+    init(4-1,1-1) = 1/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
+    init(4-1,2-1) = exp(init_raw4[1-1])/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
+    init(4-1,3-1) = exp(init_raw4[2-1])/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
         
   
     double log_lik_total = 0.0;
@@ -308,39 +326,37 @@ double log_likelihood_mod3_semi(const List list_data, NumericVector theta_star){
 
     for(int i = 0; i < n; i++){
       
-        NumericVector aux_log_alpha(N);
-        // tpm 
-        // double tpm[K][N][N];
-        NumericMatrix tpm(N,N);
+          arma::Col<double> aux_log_alpha(N);
+          arma::mat tpm(N,N);
 
           if(k == 0){
               // Creation tpm k = 1
-              tpm(1-1,1-1) = 1 - (exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i]))/(1 + (exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i])));
+              tpm(1-1,1-1) = 1/(1 + (exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i])));
               tpm(1-1,2-1) = exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i])/(1 + (exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i])));
               tpm(1-1,3-1) = exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i])/(1 + (exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i])));
 
               tpm(2-1,1-1) = exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i])/(1 + (exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i])));
-              tpm(2-1,2-1) = 1 - (exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i]))/(1 + (exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i])));
+              tpm(2-1,2-1) = 1/(1 + (exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i])));
               tpm(2-1,3-1) = exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i])/(1 + (exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i])));
 
               tpm(3-1,1-1) = exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i])/(1 + (exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i])));
               tpm(3-1,2-1) = exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i])/(1 + (exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i])));
-              tpm(3-1,3-1) = 1 - (exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i]))/(1 + (exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i])));
+              tpm(3-1,3-1) = 1/(1 + (exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i])));
 
           } else {
               int l = 47 - ll; // ll = 37
               l += 9*(k-1); 
-              tpm(1-1,1-1) = 1 - (exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i]))/(1 + (exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])));
+              tpm(1-1,1-1) = 1/(1 + (exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])));
               tpm(1-1,2-1) = exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i])/(1 + (exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])));
               tpm(1-1,3-1) = exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])/(1 + (exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])));
 
               tpm(2-1,1-1) = exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i])/(1 + (exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])));
-              tpm(2-1,2-1) = 1 - (exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i]))/(1 + (exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])));
+              tpm(2-1,2-1) = 1/(1 + (exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])));
               tpm(2-1,3-1) = exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])/(1 + (exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])));
 
               tpm(3-1,1-1) = exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i])/(1 + (exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])));
               tpm(3-1,2-1) = exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])/(1 + (exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])));
-              tpm(3-1,3-1) = 1 - (exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i]))/(1 + (exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])));
+              tpm(3-1,3-1) = 1/(1 + (exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])));
 
           }
 
@@ -514,7 +530,11 @@ double log_likelihood_mod3_semi(const List list_data, NumericVector theta_star){
   //     # if(ID[i] == 1){
   //     #   print(aux_log_alpha)
   //     # }
-      log_alpha(_,ID[i]-1) = aux_log_alpha;
+      // log_alpha(_,ID[i]-1) = aux_log_alpha;
+      for(int j = 0 ; j < N; j++){
+        log_alpha(j,ID[i]-1) = aux_log_alpha[j];
+      }
+
     }
     
     for(int i=0; i < n_ind; i++){

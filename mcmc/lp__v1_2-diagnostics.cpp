@@ -1405,7 +1405,7 @@ double lp__stdVector(const int N,
     // const arma::Col<double> mu_duration_mean = {140, 334, 516};
     // const arma::Col<double> mu_duration_sigma = {10,30,30};
     const arma::Col<double> mu_duration_mean = {140,334,516};
-    const arma::Col<double> mu_duration_sigma = {10,30,30};
+    const arma::Col<double> mu_duration_sigma = {100,300,300};
     // const arma::Col<double> sigma_duration_alpha = {500,267,845} ;
     // const arma::Col<double> sigma_duration_beta = {6.25,1.26,6.5} ;
     const arma::Col<double> sigma_duration_alpha = {20,20,33.8};
@@ -1414,7 +1414,7 @@ double lp__stdVector(const int N,
     // const arma::Col<double> mu_surface_mean = {70,86,151};
     // const arma::Col<double> mu_surface_sigma = {6,10,10};
     const arma::Col<double> mu_surface_mean = {70,86,151};
-    const arma::Col<double> mu_surface_sigma = {10,10,10};
+    const arma::Col<double> mu_surface_sigma = {60,50,100};
     // const arma::Col<double> sigma_surface_alpha = {361.25,151.25,661.25};
     // const arma::Col<double> sigma_surface_beta = {5.3125,2.75,9.6};
     const arma::Col<double> sigma_surface_alpha = {9.248,67.222,9.9146189};
@@ -1423,7 +1423,7 @@ double lp__stdVector(const int N,
     // const arma::Col<double> mu_maxDepth_mean = {32,68,170};
     // const arma::Col<double> mu_maxDepth_sigma = {5,10,5};
     const arma::Col<double> mu_maxDepth_mean = {32,68,170};
-    const arma::Col<double> mu_maxDepth_sigma = {10,10,20};
+    const arma::Col<double> mu_maxDepth_sigma = {25,50,100};
     // const arma::Col<double> sigma_maxDepth_alpha = {10,30,40};
     // const arma::Col<double> sigma_maxDepth_beta = {2,2,2};
     const arma::Col<double> sigma_maxDepth_alpha = {180,845,45};
@@ -1432,7 +1432,7 @@ double lp__stdVector(const int N,
     // const arma::Col<double> mu_step_mean = {189,675,406};
     // const arma::Col<double> mu_step_sigma = {15,45,30};
     const arma::Col<double> mu_step_mean = {189,675,406};
-    const arma::Col<double> mu_step_sigma = {20, 30, 30};
+    const arma::Col<double> mu_step_sigma = {150, 450, 300};
     // const arma::Col<double> sigma_step_alpha = {134.0,305.0,287.0};
     // const arma::Col<double> sigma_step_beta = {2,2,2};
     const arma::Col<double> sigma_step_alpha = {8.978, 46.5125, 41.1845};
@@ -1440,8 +1440,8 @@ double lp__stdVector(const int N,
     // angle
     // const arma::Col<double> kappa_alpha = {125,133.47,80};
     // const arma::Col<double> kappa_beta = {125,43.05,100};
-    const arma::Col<double> kappa_alpha = {.3125,4805,.20};
-    const arma::Col<double> kappa_beta = {.3125,1550,.25};
+    const arma::Col<double> kappa_alpha = {.3125,1.922,.20}; // Remember--- for state 2, this values are different to those used in Stan
+    const arma::Col<double> kappa_beta = {.3125,.620,.25};
     // heading variance
     // const arma::Col<double> a_alpha = {125,125,361.25};
     // const arma::Col<double> a_beta = {125,250,212.5};

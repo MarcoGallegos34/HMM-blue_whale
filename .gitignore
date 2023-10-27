@@ -32,6 +32,8 @@ server/output_pt_m_tidy_10temp.rds
 
 server/test-hyper/*
 server/test-hyper2/*
+server/test-hyper3/*
+
 server/mod2-semi-mle.R
 server/mod1_v1_output_stan_40chain.RDS
 

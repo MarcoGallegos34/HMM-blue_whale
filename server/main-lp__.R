@@ -3,10 +3,14 @@ library("optparse")
 option_list = list(
   make_option(c("-i", "--init"), type="integer", default=1, 
               help="Initial value set [default= %default]", metavar="integer"),
+  make_option(c("-c", "--constant"), type="numeric", default=2, 
+              help="geometric constant [default= %default]", metavar="numeric"),
   make_option(c("-t", "--ntemp"), type="integer", default=10, 
               help="Number of temperatures [default= %default]", metavar="integer"),
   make_option(c("-w", "--swap"), type="character", default="y", 
               help="Incorporation of Swap proposal [default= %default]", metavar="character"),
+  make_option(c("-l", "--likelihood"), type="character", default="n", 
+              help="Avoid incorporating prior information [default= %default]", metavar="character"),
   make_option(c("-s", "--step"), type="integer", default=1, 
               help="Step size tunning [default= %default]", metavar="integer"),
   make_option(c("-p", "--hyperpars"), type="integer", default=1, 
@@ -24,115 +28,142 @@ library(Rcpp)
 library(RcppParallel)
 library(RcppArmadillo)
 source("data/dataPrep_functions.R")
-if(opt$diagnostics == "y"){
-  if(opt$hyperpars == 1){
-    sourceCpp("mcmc/lp__v1_1-diagnostics.cpp")
-    source("stan-input/stan-data_init-values.R")
-  }
-  if(opt$hyperpars == 2){
-    sourceCpp("mcmc/lp__v1_2-diagnostics.cpp")
-    source("stan-input/stan-data_init-values-3.R")
-  }
-}
-if(opt$diagnostics == "n"){
-  if(opt$swap == "y"){
+if(opt$likelihood == "n"){
+  if(opt$diagnostics == "y"){
     if(opt$hyperpars == 1){
-      sourceCpp("mcmc/lp__v1_1.cpp")
+      sourceCpp("mcmc/lp__v1_1-diagnostics.cpp")
       source("stan-input/stan-data_init-values.R")
     }
     if(opt$hyperpars == 2){
-      sourceCpp("mcmc/lp__v1_2.cpp")
+      sourceCpp("mcmc/lp__v1_2-diagnostics.cpp")
       source("stan-input/stan-data_init-values-3.R")
     }
   }
-  if(opt$swap == "n"){
-    source("stan-input/stan-data_init-values.R")
-    sourceCpp("mcmc/lp__v1_1-noSwap.cpp")
+  if(opt$diagnostics == "n"){
+    if(opt$swap == "y"){
+      if(opt$hyperpars == 1){
+        sourceCpp("mcmc/lp__v1_1.cpp")
+        source("stan-input/stan-data_init-values.R")
+      }
+      if(opt$hyperpars == 2){
+        sourceCpp("mcmc/lp__v1_2.cpp")
+        source("stan-input/stan-data_init-values-3.R")
+      }
+    }
+    if(opt$swap == "n"){
+      if(opt$hyperpars == 1){
+        source("stan-input/stan-data_init-values.R")
+        sourceCpp("mcmc/lp__v1_1-noSwap.cpp")
+      }
+      if(opt$hyperpars == 2)
+        source("stan-input/stan-data_init-values-3.R") # have in mind this may not match to hyperparameters given in C++
+        sourceCpp("mcmc/lp__v1_2-noSwap.cpp")
+    }
+    
   }
+}
+if(opt$likelihood == "y"){
+  source("stan-input/stan-data_init-values.R")
+  sourceCpp("mcmc/lp__v1_3.cpp")
   
 }
-init = opt$init
+#init = opt$init
 temp = opt$ntemp
 nsimm = opt$nsim
 hyperpars = opt$hyperpars
-if(init == 1){
-  muSigma_duration = matrix(c(140,334,516,80,212,130),3,2)
-  muSigma_surface = matrix(c(70,86,151,68,55,69),3,2)
-  muSigma_maxDepth = matrix(c(32,68,170,24,65,60),3,2)
-  muSigma_step = matrix(c(189,675,406,134,305,287),3,2)
-  muKappa_angle = matrix(c(0,0,0,1,3.1,.8),3,2)
-  ab_headVar = matrix(c(1,.5,1.7,2.1,5.4,1.6),3,2)
-  lambda_lunges = c(.7,.05,3.4)
-
-  theta_star_test = c(rep(1/3,6), # tpm k = 1
-                     #c(120,300,516),muSigma_duration[,2],
-                     muSigma_duration[,1],muSigma_duration[,2], # duration
-                     muSigma_surface[,1],muSigma_surface[,2], # surface
-                     muSigma_maxDepth[,1],muSigma_maxDepth[,2], # maxDepth
-                     muSigma_step[,1],muSigma_step[,2], # step
-                     muKappa_angle[,2], # angle
-                     ab_headVar[,1],ab_headVar[,2], #varHead
-                     lambda_lunges, #lunges
-                     c(1/3,1/3), #init distribution k = 1
-                     rep(1/3,4),
-                     rep(1/2,3)) # missing entries tpm and init
-  
-  rm(muSigma_duration)
-  rm(muSigma_surface)
-  rm(muSigma_maxDepth)
-  rm(muSigma_step)
-  rm(muKappa_angle)
-  rm(ab_headVar)
-  rm(lambda_lunges)
+c = opt$constant
+if(opt$init == 1){
+  ### INIT 1 ###
+  init = c(0.05,0.05,0.1,0.05,0.05,0.05,
+            410,420,430,140,280,400,
+            140,100,65,65,50,70,
+            105,110,115,48,85,130,
+            320,450,460,225,300,450,
+            0.5,3,1,
+            2.2,0.6,0.9,1.8,5,2.1,
+            3.5,2.8,0.7,
+            0.25,0.15,
+            0.9,0.85,0.9,
+            0.6,
+            0.05,0.8,0.05)
   
 }
-if(init == 2){
- 
+if(opt$init == 2){
+  ### INIT 2 ###
+  init = c(0.01,0.25,0.05,0.05,0.15,0.05,
+           190,190,520,140,115,125,
+           65,72,155,55,65,65,
+           28,55,175,20,55,60,
+           320,325,450,250,280,325,
+           1.8,1,1,
+           0.5,1.6,1.3,3.5,3.2,1.4,
+           4,1,3.5,
+           0.17,0.65,
+           0.74,0.9,0.8,
+           0.18,
+           0.95,0.05,0.12)
     
-   muSigma_duration = matrix(c(140,515,320,80,150,155),3,2)
-   muSigma_surface = matrix(c(70,140,100,68,62,69),3,2)
-   muSigma_maxDepth = matrix(c(32,160,100,24,60,75),3,2)
-   muSigma_step = matrix(c(189,420,600,134,300,280),3,2)
-   muKappa_angle = matrix(c(0,0,0,1,1.3,1.4),3,2)
-   ab_headVar = matrix(c(.95,.9,1,2.1,1,8),3,2)
-   lambda_lunges = c(.7,3.3,3.4)
-	  
-   theta_star_test = c(rep(1/3,6), # tpm k = 1
-			#c(120,300,516),muSigma_duration[,2],
-			muSigma_duration[,1],muSigma_duration[,2], # duration
-			muSigma_surface[,1],muSigma_surface[,2], # surface
-			muSigma_maxDepth[,1],muSigma_maxDepth[,2], # maxDepth
-			muSigma_step[,1],muSigma_step[,2], # step
-			muKappa_angle[,2], # angle
-			ab_headVar[,1],ab_headVar[,2], #varHead
-			lambda_lunges, #lunges
-			c(1/3,1/3), #init distribution k = 1
-			rep(1/3,4), # missing entries tpm and init
-			# rep(1/2,3)) 
-			c(.03,.005,.88)) # weights for the zero-inflated poisson distribution 
-
-  rm(muSigma_duration)
-  rm(muSigma_surface)
-  rm(muSigma_maxDepth)
-  rm(muSigma_step)
-  rm(muKappa_angle)
-  rm(ab_headVar)
-  rm(lambda_lunges)
 }
+if(opt$init == 3){
+  
+  ### INIT 3 ###
+  init = c(0.05,0.05,0.05,0.2,0.05,0.1,
+           90,320,520,80,225,125,
+           72,80,155,70,55,65,
+           28,70,175,25,65,60,
+           180,500,520,125,300,380,
+           1,2.8,0.8,
+           1.1,0.5,1.6,2.2,5,1.5,
+           0.7,2,3.5,
+           0.17,0.65,
+           0.9,0.75,0.85,
+           0.18,
+           0.05,0.9,0.05)
+
+}
+if(opt$init == 4){
+  
+  ### INIT 4 ###
+  init = c(0.1,0.05,0.1,0.05,0.1,0.05,
+           90,480,490,80,140,275,
+           72,145,105,65,65,60,
+           28,150,155,25,60,140,
+           200,350,750,140,250,280,
+           1.2,0.8,3.2,
+           0.8,2.8,0.5,2,2.5,3.5,
+           0.5,3.5,2.5,
+           0.55,0.25,
+           0.85,0.85,0.85,
+           0.2,
+           0.05,0.05,0.75)
+  
+}
+
 
 gc()
 t1 = Sys.time()
 t1
 set.seed(194)
 #armadillo_set_seed(10)
-print(paste0("Number of temperatures: ", temp))
+print(paste0("Number of temperatures requested: ", temp))
 print(paste0("Number of simulations ",nsimm))
-print(paste0("Initial values set = ",init))
+print(paste0("Initial values set = ",opt$init))
 print(paste0("Swap between chains = ",opt$swap))
 print(paste0("Diagnostics = ",opt$diagnostics))
 print(paste0("Hyperparameter set = ",hyperpars))
-sim_parallel_temp = rcpp_parallel_pt_cw_M_target_posterior(stan_data,nsim = nsimm,init = theta_star_test,
-                                                           temp_vector = as.numeric(2^(0:temp)),
+print(paste0("Geometric constant = ",c))
+print(paste0("Only likelihood (no priors) = ",opt$likelihood))
+aux_geom_temp_vector = as.numeric(c^(0:temp))
+if(opt$swap == "y"){
+  geom_temp_vector = c(aux_geom_temp_vector[aux_geom_temp_vector < 100],100)
+}
+if(opt$swap == "n"){
+  geom_temp_vector = c(aux_geom_temp_vector[aux_geom_temp_vector < 100])
+}
+print(paste0("Actual number of temperaturers: ",length(geom_temp_vector)))
+print(geom_temp_vector)
+sim_parallel_temp = rcpp_parallel_pt_cw_M_target_posterior(stan_data,nsim = nsimm,init = init,
+                                                           temp_vector = geom_temp_vector,
                                                            #data for parallel computing
                                                            stan_data$N,
                                                            stan_data$n,
@@ -158,15 +189,25 @@ t2 = Sys.time()
 # 1.5 hrs for 150 it, 10 temps. 
 
 if(opt$diagnostics == "y"){
-    saveRDS(sim_parallel_temp,paste0("mcmc/output_rcpp_parallel_pt_m_",temp,"temp-init",init,"-hyperpars",hyperpars,"-diagnostics.rds"))
+    saveRDS(sim_parallel_temp,paste0("mcmc/output_rcpp_parallel_pt_m_","c",c,"-",length(geom_temp_vector),"temp-init",opt$init,"-hyperpars",hyperpars,"-diagnostics.rds"))
 }
 if(opt$diagnostics == "n"){
   if(opt$swap == "y"){
-    saveRDS(sim_parallel_temp,paste0("mcmc/output_rcpp_parallel_pt_m_",temp,"temp-init",init,"-hyperpars",hyperpars,".rds"))
+    if(opt$likelihood == "n"){
+      saveRDS(sim_parallel_temp,paste0("mcmc/output_rcpp_parallel_pt_m_","c",c,"-",length(geom_temp_vector),"temp-init",opt$init,"-hyperpars",hyperpars,".rds"))
+    }
+    if(opt$likelihood == "y"){
+      saveRDS(sim_parallel_temp,paste0("mcmc/output_rcpp_parallel_pt_m_","c",c,"-",length(geom_temp_vector),"temp-init",opt$init,"-noPrior",".rds"))
+    }
   }
   
   if(opt$swap == "n"){
-    saveRDS(sim_parallel_temp,paste0("mcmc/output_rcpp_parallel_pt_m_",temp,"temp-init",init,"-noSwap.rds"))
+    if(opt$likelihood == "n"){
+      saveRDS(sim_parallel_temp,paste0("mcmc/output_rcpp_parallel_pt_m_","c",c,"-",length(geom_temp_vector),"temp-init",opt$init,"-hyperpars",hyperpars,"-noSwap.rds"))
+    }
+    if(opt$likelihood == "y"){
+      saveRDS(sim_parallel_temp,paste0("mcmc/output_rcpp_parallel_pt_m_","c",c,"-",length(geom_temp_vector),"temp-init",opt$init,"-noSwap.rds"))
+    }
   }
   
   sim_target = sim_parallel_temp[[1]]
@@ -210,12 +251,17 @@ if(opt$diagnostics == "n"){
     pivot_wider(values_from=values, names_from=variable) %>% arrange(iteration,state)
   
   if(opt$swap == "y"){
-    saveRDS(sim_pt_df,paste0("mcmc/output_rcpp_parallel_pt_m_",temp,"temp_tidy-init",init,"-hyperpars",hyperpars,".rds"))
+    if(opt$likelihood == "n"){
+      saveRDS(sim_pt_df,paste0("mcmc/output_rcpp_parallel_pt_m_","c",c,"-",length(geom_temp_vector),"temp_tidy-init",opt$init,"-hyperpars",hyperpars,".rds"))
+    }
+    if(opt$likelihood == "y"){
+      saveRDS(sim_pt_df,paste0("mcmc/output_rcpp_parallel_pt_m_","c",c,"-",length(geom_temp_vector),"temp_tidy-init",opt$init,"-noPrior",".rds"))
+    }
     
   }
   
   if(opt$swap == "n"){
-    saveRDS(sim_pt_df,paste0("mcmc/output_rcpp_parallel_pt_m_",temp,"temp_tidy-init",init,"-noSwap.rds"))
+    saveRDS(sim_pt_df,paste0("mcmc/output_rcpp_parallel_pt_m_","c",c,"-",length(geom_temp_vector),"temp_tidy-init",opt$init,"-hyperpars",hyperpars,"-noSwap.rds"))
     
   }
 }

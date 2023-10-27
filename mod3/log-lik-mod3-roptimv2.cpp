@@ -17,6 +17,62 @@ double log_dvm(double x, double mu, double kappa){
     return kappa*std::cos(x-mu) -(M_LN2 + log(M_PI) + log(std::cyl_bessel_i(0,kappa)));
 }
 
+// The log of the gamma density of x given shape alpha and inverse scale beta, extended to deal with big values of alpha
+double log_gammapdf(double value, double alpha, double beta) {
+    if(value > 0){
+
+        if(alpha > 170){
+            double aux_alpha = alpha;
+            double log_gamma_alpha = 0.0;
+            while(aux_alpha > 170){
+                aux_alpha -= 1;
+                log_gamma_alpha += std::log(aux_alpha); 
+            }
+            
+            log_gamma_alpha += std::log(tgamma(aux_alpha));
+            
+            return alpha*std::log(beta) + (alpha-1)*std::log(value) - beta*value - log_gamma_alpha;
+        } else{
+            return alpha*std::log(beta) + (alpha-1)*std::log(value) - beta*value - std::log(tgamma(alpha));
+        }
+    } else {
+        return 0.0;
+    }
+}
+
+// The beta pdf
+double betapdf(double x, double alpha, double beta) {
+    if(x > 0 && x < 1){
+        return (std::pow(x, (alpha-1))*std::pow(1-x, (beta-1))*std::tgamma(alpha+beta))/(std::tgamma(alpha)*std::tgamma(beta));
+    } else {
+        return 0.0;
+    }
+}
+
+
+// The log of the Zero-Inflated Poisson mass function of x given the rate lambda and probability theta
+double log_zipoispdf(int x, double lambda, double theta){
+
+    if(x == 0){
+        arma::Col<double> aux = {std::log(theta),std::log1p(-theta) +  x*std::log(lambda) -lambda - log(std::tgamma(x+1))};
+        double aux_max = *std::max_element(std::begin(aux),std::end(aux));
+        double sum_exp_aux_max = 0.0;
+        for(int k = 0; k < 2; k++){
+            aux[k] -= aux_max;
+            sum_exp_aux_max += std::exp(aux[k]);
+        }
+         return aux_max + std::log(sum_exp_aux_max);
+    } else {
+        return std::log1p(-theta) + x*std::log(lambda) -lambda - log(std::tgamma(x+1));
+    } 
+
+}
+
+double log_poispdf(int x, double lambda){
+
+    return x*std::log(lambda) -lambda - log(std::tgamma(x+1));
+
+}
 
 struct Mle : public Functor {
     
@@ -135,23 +191,23 @@ struct Mle : public Functor {
     }
     
     arma::Col<double> alpha_duration(N);
-    // arma::Col<double> beta_duration(N);
-    arma::Col<double> theta_duration(N);
+    arma::Col<double> beta_duration(N);
+    // arma::Col<double> theta_duration(N);
 
     // # parameters for surface distribution
     arma::Col<double> alpha_surface(N);
-    // arma::Col<double> beta_surface(N);
-    arma::Col<double> theta_surface(N);
+    arma::Col<double> beta_surface(N);
+    // arma::Col<double> theta_surface(N);
     
     // # parameters for maxDepth distribution
     arma::Col<double> alpha_maxDepth(N);
-    // arma::Col<double> beta_maxDepth(N);
-    arma::Col<double> theta_maxDepth(N);
+    arma::Col<double> beta_maxDepth(N);
+    // arma::Col<double> theta_maxDepth(N);
 
     // # parameters for step distribution
     arma::Col<double> alpha_step(N);
-    // arma::Col<double> beta_step(N);
-    arma::Col<double> theta_step(N);
+    arma::Col<double> beta_step(N);
+    // arma::Col<double> theta_step(N);
     
     // # parameters for angle distribution
     arma::Col<double> a(N); 
@@ -165,20 +221,20 @@ struct Mle : public Functor {
 
     for (int i = 0; i < N; i++){
         alpha_duration[i] = pow(mu_duration[i],2) / exp(2*log_sigma_duration[i]);
-        // beta_duration[i] = mu_duration[i] / exp(2*log_sigma_duration[i]);
-        theta_duration[i] =  exp(2*log_sigma_duration[i])/mu_duration[i];
+        beta_duration[i] = mu_duration[i] / exp(2*log_sigma_duration[i]);
+        // theta_duration[i] =  exp(2*log_sigma_duration[i])/mu_duration[i];
 
         alpha_surface[i] = pow(mu_surface[i],2) / exp(2*log_sigma_surface[i]);
-        // beta_surface[i] = mu_surface[i] / exp(2*log_sigma_surface[i]);
-        theta_surface[i] =  exp(2*log_sigma_surface[i])/mu_surface[i];
+        beta_surface[i] = mu_surface[i] / exp(2*log_sigma_surface[i]);
+        // theta_surface[i] =  exp(2*log_sigma_surface[i])/mu_surface[i];
 
         alpha_maxDepth[i] = pow(mu_maxDepth[i],2) / exp(2*log_sigma_maxDepth[i]);
-        // beta_maxDepth[i] = mu_maxDepth[i] / exp(2*log_sigma_maxDepth[i]);
-        theta_maxDepth[i] =  exp(2*log_sigma_maxDepth[i])/mu_maxDepth[i];
+        beta_maxDepth[i] = mu_maxDepth[i] / exp(2*log_sigma_maxDepth[i]);
+        // theta_maxDepth[i] =  exp(2*log_sigma_maxDepth[i])/mu_maxDepth[i];
         
         alpha_step[i] = pow(mu_step[i],2) / exp(2*log_sigma_step[i]);
-        // beta_step[i] = mu_step[i] / exp(2*log_sigma_step[i]);
-        theta_step[i] =  exp(2*log_sigma_step[i])/mu_step[i];
+        beta_step[i] = mu_step[i] / exp(2*log_sigma_step[i]);
+        // theta_step[i] =  exp(2*log_sigma_step[i])/mu_step[i];
         
         a[i] = exp(log_a[i]);
         b[i] = exp(log_b[i]);
@@ -204,7 +260,7 @@ struct Mle : public Functor {
     // theta[3-1] = 1/(1+exp(-theta_raw2[2-1]));
     // theta[4-1] = 1/(1+exp(-theta_raw2[3-1]));
     // theta[1-1] = 1 - (theta[2-1] + theta[3-1] + theta[4-1]);    
-    theta[1-1] =                    1/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
+    theta[1-1] = 1/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
     theta[2-1] = exp(theta_raw2[1-1])/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
     theta[3-1] = exp(theta_raw2[2-1])/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
     theta[4-1] = exp(theta_raw2[3-1])/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
@@ -216,7 +272,7 @@ struct Mle : public Functor {
     // init(1-1,2-1) = exp(init_raw[1-1])/(1+exp(init_raw[1-1]));
     // init(1-1,3-1) = exp(init_raw[2-1])/(1+exp(init_raw[2-1]));
     // init(1-1,1-1) = 1 - (init(1-1,2-1) + init(1-1,3-1));        
-    init(1-1,1-1) =                  1/(1 + exp(init_raw[1-1]) + exp(init_raw[2-1]));
+    init(1-1,1-1) = 1/(1 + exp(init_raw[1-1]) + exp(init_raw[2-1]));
     init(1-1,2-1) = exp(init_raw[1-1])/(1 + exp(init_raw[1-1]) + exp(init_raw[2-1]));
     init(1-1,3-1) = exp(init_raw[2-1])/(1 + exp(init_raw[1-1]) + exp(init_raw[2-1]));
         
@@ -224,7 +280,7 @@ struct Mle : public Functor {
     // init(2-1,2-1) = 1/(1+exp(-init_raw2[1-1]));
     // init(2-1,3-1) = 1/(1+exp(-init_raw2[2-1]));
     // init(2-1,1-1) = 1 - (init(2-1,2-1) + init(2-1,3-1));
-    init(2-1,1-1) =                   1/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
+    init(2-1,1-1) = 1/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
     init(2-1,2-1) = exp(init_raw2[1-1])/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
     init(2-1,3-1) = exp(init_raw2[2-1])/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
     
@@ -233,7 +289,7 @@ struct Mle : public Functor {
     // init(3-1,2-1) = 1/(1+exp(-init_raw3[1-1]));
     // init(3-1,3-1) = 1/(1+exp(-init_raw3[2-1]));
     // init(3-1,1-1) = 1 - (init(3-1,2-1) + init(3-1,3-1));
-    init(3-1,1-1) =                   1/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
+    init(3-1,1-1) = 1/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
     init(3-1,2-1) = exp(init_raw3[1-1])/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
     init(3-1,3-1) = exp(init_raw3[2-1])/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
 
@@ -242,7 +298,7 @@ struct Mle : public Functor {
     // init(4-1,2-1) = 1/(1+exp(-init_raw4[1-1]));
     // init(4-1,3-1) = 1/(1+exp(-init_raw4[2-1]));
     // init(4-1,1-1) = 1 - (init(4-1,2-1) + init(4-1,3-1));
-    init(4-1,1-1) =                   1/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
+    init(4-1,1-1) = 1/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
     init(4-1,2-1) = exp(init_raw4[1-1])/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
     init(4-1,3-1) = exp(init_raw4[2-1])/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
     
@@ -264,28 +320,42 @@ struct Mle : public Functor {
         for (int state = 0; state < N; state++){
             
             log_alpha(state,*i-1) = log(init(k,state));
-            log_alpha(state,*i-1) += R::dgamma(x_duration_init[*i-1] ,
-                                                alpha_duration[state], 
-                                                // 1/beta_duration[state], 
-                                                theta_duration[state], 
-                                                true);
+            // log_alpha(state,*i-1) += R::dgamma(x_duration_init[*i-1] ,
+            //                                     alpha_duration[state], 
+            //                                     // 1/beta_duration[state], 
+            //                                     theta_duration[state], 
+            //                                     true);
 
-            log_alpha(state,*i-1) += R::dgamma(x_surface_init[*i-1] ,
-                                            alpha_surface[state], 
-                                            // 1/beta_surface[state],
-                                            theta_surface[state],
-                                            true);
+            // log_alpha(state,*i-1) += R::dgamma(x_surface_init[*i-1] ,
+            //                                 alpha_surface[state], 
+            //                                 // 1/beta_surface[state],
+            //                                 theta_surface[state],
+            //                                 true);
 
-            log_alpha(state,*i-1) += R::dgamma(x_maxDepth_init[*i-1] , 
-                                            alpha_maxDepth[state], 
-                                            // 1/beta_maxDepth[state],
-                                            theta_maxDepth[state],
-                                            true);
+            // log_alpha(state,*i-1) += R::dgamma(x_maxDepth_init[*i-1] , 
+            //                                 alpha_maxDepth[state], 
+            //                                 // 1/beta_maxDepth[state],
+            //                                 theta_maxDepth[state],
+            //                                 true);
 
-            log_alpha(state,*i-1) += R::dpois(x_lunges_init[*i-1] , 
-                                        lambda[state],
-                                        true);
-            
+            // log_alpha(state,*i-1) += R::dpois(x_lunges_init[*i-1] , 
+            //                             lambda[state],
+            //                             true);
+            log_alpha(state,*i-1) += log_gammapdf(x_duration_init[*i-1] ,
+                                                    alpha_duration[state], 
+                                                    beta_duration[state]);
+
+            log_alpha(state,*i-1) += log_gammapdf(x_surface_init[*i-1] ,
+                                                    alpha_surface[state], 
+                                                    beta_surface[state]);
+
+            log_alpha(state,*i-1) += log_gammapdf(x_maxDepth_init[*i-1] , 
+                                                    alpha_maxDepth[state], 
+                                                    beta_maxDepth[state]);
+
+            log_alpha(state,*i-1) += log_poispdf(x_lunges_init[*i-1] , 
+                                                lambda[state]);
+
             if(x_angle_init[*i-1] != 999.0){
             // arma::Col<double> aux_dvm = dvm(x_angle_init[*i-1] , _["mu"] = 0.0, _["kappa"] = kappa[state]); 
             // log_alpha(state,*i-1) += log(*(aux_dvm.begin()));
@@ -295,17 +365,25 @@ struct Mle : public Functor {
             }
 
             if(x_step_init[*i-1] != 999.0){
-            log_alpha(state,*i-1) += R::dgamma(x_step_init[*i-1] , 
-                                            alpha_step[state], 
-                                            // 1/beta_step[state],
-                                            theta_step[state],
-                                            true);
+            // log_alpha(state,*i-1) += R::dgamma(x_step_init[*i-1] , 
+            //                                 alpha_step[state], 
+            //                                 // 1/beta_step[state],
+            //                                 theta_step[state],
+            //                                 true);
+            log_alpha(state,*i-1) += log_gammapdf(x_step_init[*i-1] , 
+                                                    alpha_step[state], 
+                                                    beta_step[state]);
+
             }
             if(x_headVar_init[*i-1] != 999.0){
-            log_alpha(state,*i-1) += R::dbeta(x_headVar_init[*i-1] , 
-                                        a[state], 
-                                        b[state],
-                                        true);
+            // log_alpha(state,*i-1) += R::dbeta(x_headVar_init[*i-1] , 
+            //                             a[state], 
+            //                             b[state],
+            //                             true);
+            log_alpha(state,*i-1) += std::log(betapdf(x_headVar_init[*i-1] , 
+                                                    a[state], 
+                                                    b[state]));
+
             }
         }
         }
@@ -317,32 +395,32 @@ struct Mle : public Functor {
 
             if(k == 0){
                 // Creation tpm k = 1
-                tpm(1-1,1-1) =                                                      1/(1 + (exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i])));
+                tpm(1-1,1-1) = 1 - (exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i]))/(1 + (exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i])));
                 tpm(1-1,2-1) = exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i])/(1 + (exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i])));
                 tpm(1-1,3-1) = exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i])/(1 + (exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i])));
 
                 tpm(2-1,1-1) = exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i])/(1 + (exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i])));
-                tpm(2-1,2-1) =                                                      1/(1 + (exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i])));
+                tpm(2-1,2-1) = 1 - (exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i]))/(1 + (exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i])));
                 tpm(2-1,3-1) = exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i])/(1 + (exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i])));
 
                 tpm(3-1,1-1) = exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i])/(1 + (exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i])));
                 tpm(3-1,2-1) = exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i])/(1 + (exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i])));
-                tpm(3-1,3-1) =                                                      1/(1 + (exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i])));
+                tpm(3-1,3-1) = 1 - (exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i]))/(1 + (exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i])));
 
             } else {
                 int l = 47 - ll; // ll = 37
                 l += 9*(k-1); 
-                tpm(1-1,1-1) =                                                      1/(1 + (exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])));
+                tpm(1-1,1-1) = 1 - (exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i]))/(1 + (exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])));
                 tpm(1-1,2-1) = exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i])/(1 + (exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])));
                 tpm(1-1,3-1) = exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])/(1 + (exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])));
 
                 tpm(2-1,1-1) = exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i])/(1 + (exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])));
-                tpm(2-1,2-1) =                                                      1/(1 + (exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])));
+                tpm(2-1,2-1) = 1 - (exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i]))/(1 + (exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])));
                 tpm(2-1,3-1) = exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])/(1 + (exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])));
 
                 tpm(3-1,1-1) = exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i])/(1 + (exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])));
                 tpm(3-1,2-1) = exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])/(1 + (exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])));
-                tpm(3-1,3-1) =                                                      1/(1 + (exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])));
+                tpm(3-1,3-1) = 1 - (exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i]))/(1 + (exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])));
 
             }
         
@@ -362,27 +440,41 @@ struct Mle : public Functor {
                 // aux[previous_state] += log(tpm[k][previous_state][state]); // if I use the same matrix, I get same results, something is weird...
                 aux[previous_state] += log(tpm(previous_state,state)); // if I use the same matrix, I get same results, something is weird...
                 
-                aux[previous_state] += R::dgamma(x_duration[i] , 
+                // aux[previous_state] += R::dgamma(x_duration[i] , 
+                //                                 alpha_duration[state],
+                //                                 // 1/beta_duration[state], 
+                //                                 theta_duration[state], 
+                //                                 true);
+
+                // aux[previous_state] += R::dgamma(x_surface[i] , 
+                //                                 alpha_surface[state], 
+                //                                 // 1/beta_surface[state], 
+                //                                 theta_surface[state], 
+                //                                 true);
+
+                // aux[previous_state] += R::dgamma(x_maxDepth[i] , 
+                //                                 alpha_maxDepth[state], 
+                //                                 // 1/beta_maxDepth[state], 
+                //                                 theta_maxDepth[state], 
+                //                                 true);
+
+                // aux[previous_state] += R::dpois(x_lunges[i] , 
+                //                                 lambda[state], 
+                //                                 true);
+                aux[previous_state] += log_gammapdf(x_duration[i] , 
                                                 alpha_duration[state],
-                                                // 1/beta_duration[state], 
-                                                theta_duration[state], 
-                                                true);
+                                                beta_duration[state]);
 
-                aux[previous_state] += R::dgamma(x_surface[i] , 
-                                                alpha_surface[state], 
-                                                // 1/beta_surface[state], 
-                                                theta_surface[state], 
-                                                true);
+                aux[previous_state] += log_gammapdf(x_surface[i] , 
+                                                        alpha_surface[state], 
+                                                        beta_surface[state]);
 
-                aux[previous_state] += R::dgamma(x_maxDepth[i] , 
-                                                alpha_maxDepth[state], 
-                                                // 1/beta_maxDepth[state], 
-                                                theta_maxDepth[state], 
-                                                true);
+                aux[previous_state] += log_gammapdf(x_maxDepth[i] , 
+                                                        alpha_maxDepth[state], 
+                                                        beta_maxDepth[state]);
 
-                aux[previous_state] += R::dpois(x_lunges[i] , 
-                                                lambda[state], 
-                                                true);
+                aux[previous_state] += log_poispdf(x_lunges[i],
+                                                    lambda[state]);
 
                 }
                 
@@ -397,17 +489,22 @@ struct Mle : public Functor {
                 }
                 if(x_step[i] != 999.0){
                     for(int previous_state = 0; previous_state < N; previous_state++){
-                        aux[previous_state] += R::dgamma(x_step[i] , 
-                                                        alpha_step[state], 
-                                                        // 1/beta_step[state],
-                                                        theta_step[state],
-                                                        true);
+                        // aux[previous_state] += R::dgamma(x_step[i] , 
+                        //                                 alpha_step[state], 
+                        //                                 // 1/beta_step[state],
+                        //                                 theta_step[state],
+                        //                                 true);
+                        aux[previous_state] += log_gammapdf(x_step[i] , 
+                                                                alpha_step[state], 
+                                                                beta_step[state]);
                     }
                 }
                 
                 if(x_headVar[i] != 999.0){
                     for(int previous_state = 0; previous_state < N; previous_state++){
-                        aux[previous_state] += R::dbeta(x_headVar[i] , a[state], b[state], true);
+                        // aux[previous_state] += R::dbeta(x_headVar[i] , a[state], b[state], true);
+                        aux[previous_state] += std::log(betapdf(x_headVar[i] , a[state], b[state]));
+
                     }
                 }
                 

@@ -1406,7 +1406,7 @@ double lp__stdVector(const int N,
     // const arma::Col<double> mu_duration_mean = {140, 334, 516};
     // const arma::Col<double> mu_duration_sigma = {10,30,30};
     const arma::Col<double> mu_duration_mean = {140,334,516};
-    const arma::Col<double> mu_duration_sigma = {100,300,300};
+    const arma::Col<double> mu_duration_sigma = {10,30,30};
     // const arma::Col<double> sigma_duration_alpha = {500,267,845} ;
     // const arma::Col<double> sigma_duration_beta = {6.25,1.26,6.5} ;
     const arma::Col<double> sigma_duration_alpha = {20,20,33.8};
@@ -1415,7 +1415,7 @@ double lp__stdVector(const int N,
     // const arma::Col<double> mu_surface_mean = {70,86,151};
     // const arma::Col<double> mu_surface_sigma = {6,10,10};
     const arma::Col<double> mu_surface_mean = {70,86,151};
-    const arma::Col<double> mu_surface_sigma = {60,50,100};
+    const arma::Col<double> mu_surface_sigma = {10,10,10};
     // const arma::Col<double> sigma_surface_alpha = {361.25,151.25,661.25};
     // const arma::Col<double> sigma_surface_beta = {5.3125,2.75,9.6};
     const arma::Col<double> sigma_surface_alpha = {9.248,67.222,9.9146189};
@@ -1424,7 +1424,7 @@ double lp__stdVector(const int N,
     // const arma::Col<double> mu_maxDepth_mean = {32,68,170};
     // const arma::Col<double> mu_maxDepth_sigma = {5,10,5};
     const arma::Col<double> mu_maxDepth_mean = {32,68,170};
-    const arma::Col<double> mu_maxDepth_sigma = {25,50,100};
+    const arma::Col<double> mu_maxDepth_sigma = {10,10,20};
     // const arma::Col<double> sigma_maxDepth_alpha = {10,30,40};
     // const arma::Col<double> sigma_maxDepth_beta = {2,2,2};
     const arma::Col<double> sigma_maxDepth_alpha = {180,845,45};
@@ -1433,7 +1433,7 @@ double lp__stdVector(const int N,
     // const arma::Col<double> mu_step_mean = {189,675,406};
     // const arma::Col<double> mu_step_sigma = {15,45,30};
     const arma::Col<double> mu_step_mean = {189,675,406};
-    const arma::Col<double> mu_step_sigma = {150, 450, 300};
+    const arma::Col<double> mu_step_sigma = {20, 60, 40};
     // const arma::Col<double> sigma_step_alpha = {134.0,305.0,287.0};
     // const arma::Col<double> sigma_step_beta = {2,2,2};
     const arma::Col<double> sigma_step_alpha = {8.978, 46.5125, 41.1845};
@@ -1441,8 +1441,8 @@ double lp__stdVector(const int N,
     // angle
     // const arma::Col<double> kappa_alpha = {125,133.47,80};
     // const arma::Col<double> kappa_beta = {125,43.05,100};
-    const arma::Col<double> kappa_alpha = {.3125,1.922,.20}; // Remember--- for state 2, this values are different to those used in Stan
-    const arma::Col<double> kappa_beta = {.3125,.620,.25};
+    const arma::Col<double> kappa_alpha = {.3125,4805,.20};
+    const arma::Col<double> kappa_beta = {.3125,1550,.25};
     // heading variance
     // const arma::Col<double> a_alpha = {125,125,361.25};
     // const arma::Col<double> a_beta = {125,250,212.5};
@@ -1450,13 +1450,13 @@ double lp__stdVector(const int N,
     // const arma::Col<double> b_beta = {116.6,1,9.34};
     const arma::Col<double> a_alpha = {1.25,.2,14.45};
     const arma::Col<double> a_beta = {1.25,.4,8.5};
-    const arma::Col<double> b_alpha = {5.5125,145.8,12.8};
-    const arma::Col<double> b_beta = {2.6250,27,8};
+    const arma::Col<double> b_alpha = {5.5125,12.61246,12.8};
+    const arma::Col<double> b_beta = {2.6250,2.33564,8};
     // lunges
     // const arma::Col<double> lambda_alpha = {245,.0138,1445};
     // const arma::Col<double> lambda_beta = {350,2.77,425};
-    const arma::Col<double> lambda_alpha = {.6125,.000125,14.45};
-    const arma::Col<double> lambda_beta = {.8750,.025,4.25};
+    const arma::Col<double> lambda_alpha = {.6125,0.8,3.6125};
+    const arma::Col<double> lambda_beta = {.8750,0.4,1.0625};
 
 
     arma::Col<double> mu_duration(N);
@@ -1541,47 +1541,47 @@ double lp__stdVector(const int N,
         
         // Prior distributions associated to the duration parameters
 
-        // mu_duration ~ truncated from below at zero normal distribution
-        target+= normal_lpdf(mu_duration[i] , mu_duration_mean[i] , mu_duration_sigma[i]) - std_normal_lcdf(-mu_duration_mean[i]/mu_duration_sigma[i]);
-        // sigma_duration ~ gamma distribution
-        target+= log_gammapdf(sigma_duration[i] , sigma_duration_alpha[i], sigma_duration_beta[i]);
+        // // mu_duration ~ truncated from below at zero normal distribution
+        // target+= normal_lpdf(mu_duration[i] , mu_duration_mean[i] , mu_duration_sigma[i]) - std_normal_lcdf(-mu_duration_mean[i]/mu_duration_sigma[i]);
+        // // sigma_duration ~ gamma distribution
+        // target+= log_gammapdf(sigma_duration[i] , sigma_duration_alpha[i], sigma_duration_beta[i]);
     
-        // Prior distributions associated to the surface parameters
+        // // Prior distributions associated to the surface parameters
 
-        // mu_surface ~ truncated from below at zero normal distribution
-        target+= normal_lpdf(mu_surface[i] , mu_surface_mean[i] , mu_surface_sigma[i]) -  std_normal_lcdf(-mu_surface_mean[i]/mu_surface_sigma[i]);
-        // sigma_surface ~ gamma distribution        
-        target+= log_gammapdf(sigma_surface[i], sigma_surface_alpha[i], sigma_surface_beta[i]); 
+        // // mu_surface ~ truncated from below at zero normal distribution
+        // target+= normal_lpdf(mu_surface[i] , mu_surface_mean[i] , mu_surface_sigma[i]) -  std_normal_lcdf(-mu_surface_mean[i]/mu_surface_sigma[i]);
+        // // sigma_surface ~ gamma distribution        
+        // target+= log_gammapdf(sigma_surface[i], sigma_surface_alpha[i], sigma_surface_beta[i]); 
     
-        // Prior distributions associated to the maximum depth parameters
+        // // Prior distributions associated to the maximum depth parameters
         
-        // mu_maxDepth ~ truncated from below at zero normal distribution
-        target+= normal_lpdf(mu_maxDepth[i] , mu_maxDepth_mean[i] , mu_maxDepth_sigma[i]) - std_normal_lcdf(-mu_maxDepth_mean[i]/mu_maxDepth_sigma[i]);
-        // sigma_maxDepth ~ gamma distribution
-        target+= log_gammapdf(sigma_maxDepth[i] , sigma_maxDepth_alpha[i], sigma_maxDepth_beta[i]);
+        // // mu_maxDepth ~ truncated from below at zero normal distribution
+        // target+= normal_lpdf(mu_maxDepth[i] , mu_maxDepth_mean[i] , mu_maxDepth_sigma[i]) - std_normal_lcdf(-mu_maxDepth_mean[i]/mu_maxDepth_sigma[i]);
+        // // sigma_maxDepth ~ gamma distribution
+        // target+= log_gammapdf(sigma_maxDepth[i] , sigma_maxDepth_alpha[i], sigma_maxDepth_beta[i]);
 
-        // Prior distributions associated to the number of steps parameters
+        // // Prior distributions associated to the number of steps parameters
 
-        // mu_step ~ truncated from below at zero normal distribution
-        target+= normal_lpdf(mu_step[i] , mu_step_mean[i] , mu_step_sigma[i]) - std_normal_lcdf(-mu_step_mean[i]/mu_step_sigma[i]);
-        // sigma_step ~ gamma distribution        
-        target+= log_gammapdf(sigma_step[i], sigma_step_alpha[i], sigma_step_beta[i]);
+        // // mu_step ~ truncated from below at zero normal distribution
+        // target+= normal_lpdf(mu_step[i] , mu_step_mean[i] , mu_step_sigma[i]) - std_normal_lcdf(-mu_step_mean[i]/mu_step_sigma[i]);
+        // // sigma_step ~ gamma distribution        
+        // target+= log_gammapdf(sigma_step[i], sigma_step_alpha[i], sigma_step_beta[i]);
 
-        // Prior distributions associated to the turning angle parameters
+        // // Prior distributions associated to the turning angle parameters
 
-        // kappa ~ gamma distribution
-        target+= log_gammapdf(kappa[i] , kappa_alpha[i], kappa_beta[i]);
+        // // kappa ~ gamma distribution
+        // target+= log_gammapdf(kappa[i] , kappa_alpha[i], kappa_beta[i]);
 
-        // Prior distributions associated to the heading variance parameters
-        // a ~ gamma distribution
-        target+= log_gammapdf(a[i] , a_alpha[i], a_beta[i]);
-        // b ~ gamma distribution
-        target+= log_gammapdf(b[i] , b_alpha[i], b_beta[i]);
+        // // Prior distributions associated to the heading variance parameters
+        // // a ~ gamma distribution
+        // target+= log_gammapdf(a[i] , a_alpha[i], a_beta[i]);
+        // // b ~ gamma distribution
+        // target+= log_gammapdf(b[i] , b_alpha[i], b_beta[i]);
 
-        // Prior distributions associated to the number of lunges parameters
+        // // Prior distributions associated to the number of lunges parameters
 
-        // lambda ~ gamma distribution 
-        target+= log_gammapdf(lambda[i] , lambda_alpha[i], lambda_beta[i]);
+        // // lambda ~ gamma distribution 
+        // target+= log_gammapdf(lambda[i] , lambda_alpha[i], lambda_beta[i]);
 
         // For the probability theta, we assumed theta ~ U(0,1), so there's no need to write down code to include this
         

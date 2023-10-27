@@ -83,7 +83,7 @@ semiMles_par = semiMleExtended_bfgs_par(stan_data$K,
                                 stan_data$x_headVar,
                                 stan_data$x_exposure,
                                 stan_data$estimate,
-                                mod3_init_mat[,269])
+                                theta_test)
 t2 = Sys.time()
 t2-t1
 # Semi Mle = 25638.102874
@@ -243,3 +243,93 @@ init_vector(aux_final_theta[10:11])
 init_vector(aux_final_theta[19:20])
 # k = 4
 init_vector(aux_final_theta[28:29])
+
+sourceCpp("mod3/log-lik-semi.cpp")
+stan_data$estimate = final_theta[1:42]
+stan_data$K = 4
+log_likelihood_mod3_semi(stan_data,aux_final_theta)
+
+#rnorm(1,-4.5 + 1.24,1),rnorm(1,-5 - .390,1)), # tpm k = 1
+#c(-6,-1.65) + rnorm(2,0,.1), # init k = 1
+#.2642 + rnorm(1,0,.1), # pi = 2
+#c(-.525,-5), # init k = 2
+#rnorm(1,-4+1.24,1),rnorm(1,-1.2-.39,1)), # tpm k = 2
+#-1.9 + rnorm(1,0,.1), # pi for k = 3
+#c(-.525,-5) + rnorm(2,0,.1), # init k = 3
+#rnorm(1,-3.88+1.24,1),rnorm(1,-2-.39,1)), # tpm k = 3
+#-.8 + rnorm(1,0,.1), # pi for k = 4
+#c(-5,-.67) + rnorm(2,0,.1), # init k = 4
+#rnorm(1,-1.74+1.24,1),rnorm(1,1.37-.39,1)), # tpm k = 4
+#c(-.997,-27.1,17,.147,-1.24,.39)) # covariates beta
+
+
+aux_final_theta_permuted = c(aux_final_theta[1:6], # tpm k = 1
+                             aux_final_theta[7:8], # init k = 1
+                             aux_final_theta[27], # pi k = 2
+                             aux_final_theta[28:29], # init k = 2
+                             aux_final_theta[30:35], # tpm k = 2
+                             aux_final_theta[9], # pi k = 3
+                             aux_final_theta[10:11], # init k =3
+                             aux_final_theta[12:17], # tpm k = 3
+                             aux_final_theta[18], # pi k = 4
+                             aux_final_theta[19:20], # init k = 4
+                             aux_final_theta[21:26], # tpm k = 4 
+                             aux_final_theta[36:41])
+
+aux_final_theta_permuted = c(aux_final_theta[1:6], # tpm k = 1
+                             aux_final_theta[7:8], # init k = 1
+                             0, # pi k = 2
+                             0,0, # init k = 2
+                             rep(0,6), # tpm k = 2
+                             0, # pi k = 3
+                             0,0, # init k =3
+                             rep(0,6), # tpm k = 3
+                             0, # pi k = 4
+                             0,0, # init k = 4
+                             rep(0,6), # tpm k = 4 
+                             aux_final_theta[36:41])
+
+aux_final_theta_permuted = c(rep(0,6), # tpm k = 1
+                             0,0, # init k = 1
+                             0, # pi k = 2
+                             0,0, # init k = 2
+                             rep(0,6), # tpm k = 2
+                             0, # pi k = 3
+                             0,0, # init k =3
+                             rep(0,6), # tpm k = 3
+                             0, # pi k = 4
+                             aux_final_theta[7:8], # init k = 4
+                             aux_final_theta[1:6], # tpm k = 4 
+                             aux_final_theta[36:41])
+
+log_likelihood_mod3_semi(stan_data,aux_final_theta_permuted)
+
+# k = 1
+alphas_to_tpm(aux_final_theta[1:6]) 
+
+# k = 2
+alphas_to_tpm(aux_final_theta[12:17]) 
+
+# k = 3
+alphas_to_tpm(aux_final_theta[21:26]) 
+
+# k = 4
+alphas_to_tpm(aux_final_theta[30:35]) 
+
+# pi (weights for each of the contexts)
+
+pi_vector(aux_final_theta[c(9,18,27)])
+
+# inits
+
+# k = 1
+init_vector(aux_final_theta[7:8])
+# k = 2
+init_vector(aux_final_theta[10:11])
+# k = 3
+init_vector(aux_final_theta[19:20])
+# k = 4
+init_vector(aux_final_theta[28:29])
+
+
+

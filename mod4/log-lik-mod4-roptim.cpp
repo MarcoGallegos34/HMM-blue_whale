@@ -6,7 +6,13 @@
 // [[Rcpp::depends(roptim)]]
 #include <roptim.h>
 
+// [[Rcpp::depends(RcppParallel)]]
+#include <RcppParallel.h>
+
+
+using namespace Rcpp;
 using namespace roptim;
+using namespace RcppParallel;
 
 // using namespace Rcpp;
 
@@ -18,7 +24,8 @@ double log_dvm(double x, double mu, double kappa){
 }
 
 
-struct Mle : public Functor {
+struct SemiMleExtended : public Functor {
+// class SemiMleExtended {
     
     // private:
     public:
@@ -45,10 +52,9 @@ struct Mle : public Functor {
         arma::Col<double> x_angle;
         arma::Col<double> x_headVar;
         arma::Col<int> x_exposure;
-        // arma::Col<double> estimate;
 
 
-    Mle (
+    SemiMleExtended (
         const int K_in,
         const int N_in,
         const int n_in,
@@ -125,6 +131,9 @@ struct Mle : public Functor {
         mu_step[i] = theta_star[i+24];
         log_sigma_step[i] = theta_star[i+27];
 
+        mu_step[i] = theta_star[i+24];
+        log_sigma_step[i] = theta_star[i+27];
+
         log_kappa[i] = theta_star[i+30];
 
         log_a[i] = theta_star[i+33];
@@ -189,8 +198,7 @@ struct Mle : public Functor {
     }
     
     
-    
-    // from here the values will be extracted from theta_star, not estimate
+// from here the values will be extracted from theta_star, not estimate
 
     // int ll = 36 + 1;
     int ll = 1;
@@ -203,7 +211,7 @@ struct Mle : public Functor {
     // theta[2-1] = 1/(1+exp(-theta_raw2[1-1]));
     // theta[3-1] = 1/(1+exp(-theta_raw2[2-1]));
     // theta[4-1] = 1/(1+exp(-theta_raw2[3-1]));
-    // theta[1-1] = 1 - (theta[2-1] + theta[3-1] + theta[4-1]);    
+    // theta[1-1] = 1 - (theta[2-1] + theta[3-1] + theta[4-1]);
     theta[1-1] =                    1/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
     theta[2-1] = exp(theta_raw2[1-1])/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
     theta[3-1] = exp(theta_raw2[2-1])/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
@@ -211,6 +219,28 @@ struct Mle : public Functor {
     
   // return theta;
   
+    // # init
+    // arma::mat init(K,N);
+    // init(1-1,2-1) = exp(init_raw[1-1])/(1+exp(init_raw[1-1]));
+    // init(1-1,3-1) = exp(init_raw[2-1])/(1+exp(init_raw[2-1]));
+    // init(1-1,1-1) = 1 - (init(1-1,2-1) + init(1-1,3-1));
+        
+    // arma::Col<double> init_raw2 = {theta_star[46-ll],theta_star[47-ll]};
+    // init(2-1,2-1) = 1/(1+exp(-init_raw2[1-1]));
+    // init(2-1,3-1) = 1/(1+exp(-init_raw2[2-1]));
+    // init(2-1,1-1) = 1 - (init(2-1,2-1) + init(2-1,3-1));
+    
+    
+    // arma::Col<double> init_raw3 = {theta_star[55-ll],theta_star[56-ll]};
+    // init(3-1,2-1) = 1/(1+exp(-init_raw3[1-1]));
+    // init(3-1,3-1) = 1/(1+exp(-init_raw3[2-1]));
+    // init(3-1,1-1) = 1 - (init(3-1,2-1) + init(3-1,3-1));
+    
+    // arma::Col<double> init_raw4 = {theta_star[64-ll],theta_star[65-ll]};
+    // init(4-1,2-1) = 1/(1+exp(-init_raw4[1-1]));
+    // init(4-1,3-1) = 1/(1+exp(-init_raw4[2-1]));
+    // init(4-1,1-1) = 1 - (init(4-1,2-1) + init(4-1,3-1));
+
     // # init
     arma::mat init(K,N);
     // init(1-1,2-1) = exp(init_raw[1-1])/(1+exp(init_raw[1-1]));
@@ -245,11 +275,11 @@ struct Mle : public Functor {
     init(4-1,1-1) =                   1/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
     init(4-1,2-1) = exp(init_raw4[1-1])/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
     init(4-1,3-1) = exp(init_raw4[2-1])/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
-    
-    
-    double log_lik_total = 0.0;
-    // NumericVector log_lik_total(n_ind);    
 
+
+    double log_lik_total = 0.0;
+    // NumericVector log_lik_total(n_ind);
+    
     // Environment pkg = Environment::namespace_env("CircStats");
 
     // Function dvm = pkg["dvm"];  
@@ -317,34 +347,66 @@ struct Mle : public Functor {
 
             if(k == 0){
                 // Creation tpm k = 1
-                tpm(1-1,1-1) =                                                      1/(1 + (exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i])));
+                tpm(1-1,1-1) = 1 - (exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i]))/(1 + (exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i])));
                 tpm(1-1,2-1) = exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i])/(1 + (exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i])));
                 tpm(1-1,3-1) = exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i])/(1 + (exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i])));
 
                 tpm(2-1,1-1) = exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i])/(1 + (exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i])));
-                tpm(2-1,2-1) =                                                      1/(1 + (exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i])));
+                tpm(2-1,2-1) = 1 - (exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i]))/(1 + (exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i])));
                 tpm(2-1,3-1) = exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i])/(1 + (exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i])));
 
                 tpm(3-1,1-1) = exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i])/(1 + (exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i])));
                 tpm(3-1,2-1) = exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i])/(1 + (exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i])));
-                tpm(3-1,3-1) =                                                      1/(1 + (exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i])));
+                tpm(3-1,3-1) = 1 - (exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i]))/(1 + (exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i])));
 
             } else {
                 int l = 47 - ll; // ll = 37
                 l += 9*(k-1); 
-                tpm(1-1,1-1) =                                                      1/(1 + (exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])));
-                tpm(1-1,2-1) = exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i])/(1 + (exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])));
-                tpm(1-1,3-1) = exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])/(1 + (exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])));
+                tpm(1-1,1-1) = 1 - (exp(theta_star[1+l] + theta_star[72-ll + 6*k]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll + 6*k]*x_exposure[i]))/(1 + (exp(theta_star[1+l] + theta_star[72-ll + 6*k]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll + 6*k]*x_exposure[i])));
+                tpm(1-1,2-1) = exp(theta_star[1+l] + theta_star[72-ll + 6*k]*x_exposure[i])/(1 + (exp(theta_star[1+l] + theta_star[72-ll + 6*k]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll + 6*k]*x_exposure[i])));
+                tpm(1-1,3-1) = exp(theta_star[2+l] + theta_star[73-ll + 6*k]*x_exposure[i])/(1 + (exp(theta_star[1+l] + theta_star[72-ll + 6*k]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll + 6*k]*x_exposure[i])));
 
-                tpm(2-1,1-1) = exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i])/(1 + (exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])));
-                tpm(2-1,2-1) =                                                      1/(1 + (exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])));
-                tpm(2-1,3-1) = exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])/(1 + (exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])));
+                tpm(2-1,1-1) = exp(theta_star[3+l] + theta_star[74-ll + 6*k]*x_exposure[i])/(1 + (exp(theta_star[3+l] + theta_star[74-ll + 6*k]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll + 6*k]*x_exposure[i])));
+                tpm(2-1,2-1) = 1 - (exp(theta_star[3+l] + theta_star[74-ll + 6*k]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll + 6*k]*x_exposure[i]))/(1 + (exp(theta_star[3+l] + theta_star[74-ll + 6*k]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll + 6*k]*x_exposure[i])));
+                tpm(2-1,3-1) = exp(theta_star[4+l] + theta_star[75-ll + 6*k]*x_exposure[i])/(1 + (exp(theta_star[3+l] + theta_star[74-ll + 6*k]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll + 6*k]*x_exposure[i])));
 
-                tpm(3-1,1-1) = exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i])/(1 + (exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])));
-                tpm(3-1,2-1) = exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])/(1 + (exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])));
-                tpm(3-1,3-1) =                                                      1/(1 + (exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])));
+                tpm(3-1,1-1) = exp(theta_star[5+l] + theta_star[76-ll + 6*k]*x_exposure[i])/(1 + (exp(theta_star[5+l] + theta_star[76-ll + 6*k]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll + 6*k]*x_exposure[i])));
+                tpm(3-1,2-1) = exp(theta_star[6+l] + theta_star[77-ll + 6*k]*x_exposure[i])/(1 + (exp(theta_star[5+l] + theta_star[76-ll + 6*k]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll + 6*k]*x_exposure[i])));
+                tpm(3-1,3-1) = 1 - (exp(theta_star[5+l] + theta_star[76-ll + 6*k]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll + 6*k]*x_exposure[i]))/(1 + (exp(theta_star[5+l] + theta_star[76-ll + 6*k]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll + 6*k]*x_exposure[i])));
 
             }
+
+
+            // if(k == 0){
+            //     // Creation tpm k = 1
+            //     tpm(1-1,1-1) = 1 - (exp(theta_star[1-1] + theta_star[66-1]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[67-1]*x_exposure[i]))/(1 + (exp(theta_star[1-1] + theta_star[66-1]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[67-1]*x_exposure[i])));
+            //     tpm(1-1,2-1) = exp(theta_star[1-1] + theta_star[66-1]*x_exposure[i])/(1 + (exp(theta_star[1-1] + theta_star[66-1]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[67-1]*x_exposure[i])));
+            //     tpm(1-1,3-1) = exp(theta_star[2-1] + theta_star[67-1]*x_exposure[i])/(1 + (exp(theta_star[1-1] + theta_star[66-1]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[67-1]*x_exposure[i])));
+
+            //     tpm(2-1,1-1) = exp(theta_star[3-1] + theta_star[68-1]*x_exposure[i])/(1 + (exp(theta_star[3-1] + theta_star[68-1]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[69-1]*x_exposure[i])));
+            //     tpm(2-1,2-1) = 1 - (exp(theta_star[3-1] + theta_star[68-1]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[69-1]*x_exposure[i]))/(1 + (exp(theta_star[3-1] + theta_star[68-1]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[69-1]*x_exposure[i])));
+            //     tpm(2-1,3-1) = exp(theta_star[4-1] + theta_star[69-1]*x_exposure[i])/(1 + (exp(theta_star[3-1] + theta_star[68-1]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[69-1]*x_exposure[i])));
+
+            //     tpm(3-1,1-1) = exp(theta_star[5-1] + theta_star[70-1]*x_exposure[i])/(1 + (exp(theta_star[5-1] + theta_star[70-1]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[71-1]*x_exposure[i])));
+            //     tpm(3-1,2-1) = exp(theta_star[6-1] + theta_star[71-1]*x_exposure[i])/(1 + (exp(theta_star[5-1] + theta_star[70-1]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[71-1]*x_exposure[i])));
+            //     tpm(3-1,3-1) = 1 - (exp(theta_star[5-1] + theta_star[70-1]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[71-1]*x_exposure[i]))/(1 + (exp(theta_star[5-1] + theta_star[70-1]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[71-1]*x_exposure[i])));
+
+            // } else {
+            //     int l = 47 - ll; // ll = 37
+            //     l += 9*(k-1); 
+            //     tpm(1-1,1-1) = 1 - (exp(theta_star[1+l] + theta_star[66-1]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[67-1]*x_exposure[i]))/(1 + (exp(theta_star[1+l] + theta_star[66-1]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[67-1]*x_exposure[i])));
+            //     tpm(1-1,2-1) = exp(theta_star[1+l] + theta_star[66-1]*x_exposure[i])/(1 + (exp(theta_star[1+l] + theta_star[66-1]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[67-1]*x_exposure[i])));
+            //     tpm(1-1,3-1) = exp(theta_star[2+l] + theta_star[67-1]*x_exposure[i])/(1 + (exp(theta_star[1+l] + theta_star[66-1]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[67-1]*x_exposure[i])));
+
+            //     tpm(2-1,1-1) = exp(theta_star[3+l] + theta_star[68-1]*x_exposure[i])/(1 + (exp(theta_star[3+l] + theta_star[68-1]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[69-1]*x_exposure[i])));
+            //     tpm(2-1,2-1) = 1 - (exp(theta_star[3+l] + theta_star[68-1]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[69-1]*x_exposure[i]))/(1 + (exp(theta_star[3+l] + theta_star[68-1]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[69-1]*x_exposure[i])));
+            //     tpm(2-1,3-1) = exp(theta_star[4+l] + theta_star[69-1]*x_exposure[i])/(1 + (exp(theta_star[3+l] + theta_star[68-1]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[69-1]*x_exposure[i])));
+
+            //     tpm(3-1,1-1) = exp(theta_star[5+l] + theta_star[70-1]*x_exposure[i])/(1 + (exp(theta_star[5+l] + theta_star[70-1]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[71-1]*x_exposure[i])));
+            //     tpm(3-1,2-1) = exp(theta_star[6+l] + theta_star[71-1]*x_exposure[i])/(1 + (exp(theta_star[5+l] + theta_star[70-1]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[71-1]*x_exposure[i])));
+            //     tpm(3-1,3-1) = 1 - (exp(theta_star[5+l] + theta_star[70-1]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[71-1]*x_exposure[i]))/(1 + (exp(theta_star[5+l] + theta_star[70-1]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[71-1]*x_exposure[i])));
+
+            // }
         
             for(int state = 0; state < N; state++){
                 
@@ -434,8 +496,9 @@ struct Mle : public Functor {
   }
 };
 
+// arma::Col<double> semiMleExtended_bfgs(    
 // [[Rcpp::export]]
-double mle_bfgs(    
+double semiMleExtended_bfgs(    
     const int K,
     const int N,
     const int n,
@@ -461,7 +524,7 @@ double mle_bfgs(
     arma::Col<double> theta_star
 )
 {
-  Mle sm(
+  SemiMleExtended sm(
     K,
     N,
     n,
@@ -485,15 +548,14 @@ double mle_bfgs(
     x_headVar,
     x_exposure);
 
-  Roptim<Mle> opt("BFGS");
+  Roptim<SemiMleExtended> opt("BFGS");
   opt.control.trace = 1;
   opt.control.maxit = 30000;
-
   // opt.set_hessian(true);
   // arma::vec x = {-1.2, 1};
   opt.minimize(sm, theta_star);
   Rcpp::Rcout << "-------------------------" << std::endl;
-  opt.print();
+//   opt.print();
   return opt.value();
 //   return opt.par();
 }
@@ -525,7 +587,7 @@ arma::Col<double> mle_bfgs_par(
     arma::Col<double> theta_star
 )
 {
-  Mle sm(
+  SemiMleExtended sm(
     K,
     N,
     n,
@@ -549,80 +611,14 @@ arma::Col<double> mle_bfgs_par(
     x_headVar,
     x_exposure);
 
-  Roptim<Mle> opt("BFGS");
+  Roptim<SemiMleExtended> opt("BFGS");
   opt.control.trace = 1;
   opt.control.maxit = 30000;
-
   // opt.set_hessian(true);
   // arma::vec x = {-1.2, 1};
   opt.minimize(sm, theta_star);
   Rcpp::Rcout << "-------------------------" << std::endl;
-  opt.print();
+//   opt.print();
 //   return opt.value();
   return opt.par();
-}
-
-// [[Rcpp::export]]
-arma::Col<double> mle_bfgs_hessian(    
-    const int K,
-    const int N,
-    const int n,
-    const int n_ind,
-    arma::Col<int> ID_init,
-    const arma::Col<int> ID,
-    const arma::Col<double> x_duration_init,
-    const arma::Col<double> x_surface_init,
-    const arma::Col<double> x_maxDepth_init,
-    const arma::Col<int> x_lunges_init,
-    const arma::Col<double> x_step_init,
-    const arma::Col<double> x_angle_init,
-    const arma::Col<double> x_headVar_init,
-    const arma::Col<int> x_exposure_init,
-    const arma::Col<double> x_duration,
-    const arma::Col<double> x_surface,
-    const arma::Col<double> x_maxDepth,
-    const arma::Col<int> x_lunges,
-    const arma::Col<double> x_step,
-    const arma::Col<double> x_angle,
-    const arma::Col<double> x_headVar,
-    const arma::Col<int> x_exposure,
-    arma::Col<double> theta_star
-)
-{
-  Mle sm(
-    K,
-    N,
-    n,
-    n_ind,
-    ID_init,
-    ID,
-    x_duration_init,
-    x_surface_init,
-    x_maxDepth_init,
-    x_lunges_init,
-    x_step_init,
-    x_angle_init,
-    x_headVar_init,
-    x_exposure_init,
-    x_duration,
-    x_surface,
-    x_maxDepth,
-    x_lunges,
-    x_step,
-    x_angle,
-    x_headVar,
-    x_exposure);
-
-  Roptim<Mle> opt("BFGS");
-  opt.control.trace = 1;
-  opt.control.maxit = 30000;
-  opt.set_hessian(true);
-  // opt.set_hessian(true);
-  // arma::vec x = {-1.2, 1};
-  opt.minimize(sm, theta_star);
-  Rcpp::Rcout << "-------------------------" << std::endl;
-  opt.print();
-//   return opt.value();
-//   return opt.par();
-    return opt.hessian();
 }

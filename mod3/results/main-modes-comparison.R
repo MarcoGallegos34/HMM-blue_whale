@@ -61,38 +61,41 @@ for(j in 1:30){
     aux_theta = rdirichlet(1,alpha=rep(1,4))
     
     mod3_init_array[,i,j] = c(c(rnorm(1,-5+.997,1),rnorm(1,-5+27.1,1),
-                            rnorm(1,-1.25 -17,1),rnorm(1,-5-.147,1),
-                            rnorm(1,-4.5 + 1.24,1),rnorm(1,-5 - .390,1)), # tpm k = 1
-                          #qlogis(aux_inits[1,2:3]), # init k = 1
-                          c(-6,-1.65) + rnorm(2,0,.1), # init k = 1
-                          .2642 + rnorm(1,0,.1), # pi
-                          # qlogis(.449) + rnorm(1,0,1), # pi
-                          c(-.525,-5), # init k = 2
-                          # qlogis(c(.37,.001)) + rnorm(2,0,1), # init k = 2
-                          c(rnorm(1,-8+.997,1),rnorm(1,-31.5+27.1,1),
-                            rnorm(1,-5-17,1),rnorm(1,-1.35-.147,1),
-                            rnorm(1,-4+1.24,1),rnorm(1,-1.2-.39,1)), # tpm k = 2
-                          -1.9 + rnorm(1,0,.1), # pi for k = 3
-                          # qlogis(.054) + rnorm(1,0,1), # pi for k = 3
-                          c(-.525,-5) + rnorm(2,0,.1), # init k = 3
-                          # qlogis(c(.5,.001)) + rnorm(2,0,1), # init k = 3
-                          c(rnorm(1,-2.9+.997,1),rnorm(1,-27.52 + 27.1,1),
-                            rnorm(1,-5-17,1),rnorm(1,-1.95-.147,1),
-                            rnorm(1,-3.88+1.24,1),rnorm(1,-2-.39,1)), # tpm k = 3
-                          -.8 + rnorm(1,0,.1), # pi for k = 4
-                          # qlogis(.163) + rnorm(1,0,1), # pi for k = 4
-                          c(-5,-.67) + rnorm(2,0,.1), # init k = 4
-                          # qlogis(c(.001,.34)) + rnorm(1,0,1), # init k = 4
-                          c(rnorm(1,-1.55+.997,1),rnorm(1,-26.55+27.1,1),
-                            rnorm(1,-4-17,1),rnorm(1,.42-.147,1),
-                            rnorm(1,-1.74+1.24,1),rnorm(1,1.37-.39,1)), # tpm k = 4
-                          c(-.997,-27.1,17,.147,-1.24,.39)) # covariates beta
+                                rnorm(1,-1.25 -17,1),rnorm(1,-5-.147,1),
+                                rnorm(1,-4.5 + 1.24,1),rnorm(1,-5 - .390,1)), # tpm k = 1
+                              #qlogis(aux_inits[1,2:3]), # init k = 1
+                              c(-6,-1.65) + rnorm(2,0,.1), # init k = 1
+                              .2642 + rnorm(1,0,.1), # pi
+                              # qlogis(.449) + rnorm(1,0,1), # pi
+                              c(-.525,-5) + rnorm(2,0,.1), # init k = 2
+                              # qlogis(c(.37,.001)) + rnorm(2,0,1), # init k = 2
+                              c(rnorm(1,-8+.997,1),rnorm(1,-31.5+27.1,1),
+                                rnorm(1,-5-17,1),rnorm(1,-1.35-.147,1),
+                                rnorm(1,-4+1.24,1),rnorm(1,-1.2-.39,1)), # tpm k = 2
+                              -1.9 + rnorm(1,0,.1), # pi for k = 3
+                              # qlogis(.054) + rnorm(1,0,1), # pi for k = 3
+                              c(-0,-5) + rnorm(2,0,.1), # init k = 3
+                              # qlogis(c(.5,.001)) + rnorm(2,0,1), # init k = 3
+                              c(rnorm(1,-2.9+.997,1),rnorm(1,-27.52 + 27.1,1),
+                                rnorm(1,-5-17,1),rnorm(1,-1.95-.147,1),
+                                # rnorm(1,-3.88+1.24,1),rnorm(1,-2-.39,1)), # tpm k = 3
+                                rnorm(1,1.23+1.24,1), rnorm(1,0.26-.39,1)), # tpm k = 3
+                              -.8 + rnorm(1,0,.1), # pi for k = 4
+                              # qlogis(.163) + rnorm(1,0,1), # pi for k = 4
+                              c(-5,-.67) + rnorm(2,0,.1), # init k = 4
+                              # qlogis(c(.001,.34)) + rnorm(1,0,1), # init k = 4
+                              c(rnorm(1,-1.55+.997,1),rnorm(1,-26.55+27.1,1),
+                                rnorm(1,-4-17,1),rnorm(1,.42-.147,1),
+                                # rnorm(1,-1.74+1.24,1),rnorm(1,1.37-.39,1)), # tpm k = 4
+                                rnorm(1,-2.18+1.24,1),rnorm(1,-1.1-.39,1)), # tpm k = 4
+                              c(-.997,-27.1,17,.147,-1.24,.39)) # covariates beta
   }
 }
 
 sourceCpp("mod3/log-lik-semi-roptim.cpp")
+sourceCpp("mod3/log-lik-semi-roptimv2.cpp")
 
-
+t1 = Sys.time()
 semiMles_par1 = semiMleExtended_bfgs_par(stan_data$K,
                                 stan_data$N,
                                 stan_data$n,
@@ -116,8 +119,12 @@ semiMles_par1 = semiMleExtended_bfgs_par(stan_data$K,
                                 stan_data$x_headVar,
                                 stan_data$x_exposure,
                                 stan_data$estimate,
-                                mod3_init_array[,332,5])
+                                mod3_init_array[,54,5])
+t2 = Sys.time()
+t2-t1
 
+
+t1 = Sys.time()
 semiMles_par2 = semiMleExtended_bfgs_par(stan_data$K,
                                 stan_data$N,
                                 stan_data$n,
@@ -141,8 +148,11 @@ semiMles_par2 = semiMleExtended_bfgs_par(stan_data$K,
                                 stan_data$x_headVar,
                                 stan_data$x_exposure,
                                 stan_data$estimate,
-                                mod3_init_array[,339,11])
+                                mod3_init_array[,119,2])
+t2 = Sys.time()
+t2-t1
 
+t1 = Sys.time()
 semiMles_par3 = semiMleExtended_bfgs_par(stan_data$K,
                                 stan_data$N,
                                 stan_data$n,
@@ -166,36 +176,38 @@ semiMles_par3 = semiMleExtended_bfgs_par(stan_data$K,
                                 stan_data$x_headVar,
                                 stan_data$x_exposure,
                                 stan_data$estimate,
-                                mod3_init_array[,21,12])
-
+                                mod3_init_array[,51,4])
+t2 = Sys.time()
+t2-t1
 
 semiMles_par1- semiMles_par2
 semiMles_par1- semiMles_par3
 semiMles_par2- semiMles_par3
 
-result[332,5]
-result[339,11]
-result[21,12]
-result[23,17]
-
-
-which( result <= 25643.1)
-
-result[8023]
-result[10769]
 
 hist(result,breaks = 80)
 
 semiMles_par1
 
-
+# saveRDS(semiMles_par1,"mod3/results/semi_mle_pars.RDS")
+saveRDS(semiMles_par2,"mod3/results/semi_mle_pars_new3.RDS")
+semiMles_par3 = readRDS("mod3/results/semi_mle_pars_new3.RDS")
 sourceCpp("mod3/log-lik-mod3-roptim.cpp")
 
+#semiMles_par1 = readRDS("mod3/results/semi_mle_pars.RDS")
 
-semi_theta_star = c(semiMles_par[1:6],
+
+
+semi_theta_star = c(semiMles_par1[1:6],
                     stan_data$estimate[7:42],
-                    semiMles_par[7:41])
+                    semiMles_par1[7:41])
 
+semi_theta_star = c(semiMles_par2[1:6],
+                    stan_data$estimate[7:42],
+                    semiMles_par2[7:41])
+
+t1 = Sys.time()
+t1
 final_theta = mle_bfgs_par(stan_data$K,
                            stan_data$N,
                            stan_data$n,
@@ -219,4 +231,39 @@ final_theta = mle_bfgs_par(stan_data$K,
                            stan_data$x_headVar,
                            stan_data$x_exposure,
                            semi_theta_star)
+t2 = Sys.time()
+t2-t1
 
+saveRDS(final_theta,"mod3/results/mle_pars.RDS")
+
+set.seed(28374)
+noise = rnorm(77,0,.1)
+
+t1 = Sys.time()
+t1
+final_theta2 = mle_bfgs_par(stan_data$K,
+                           stan_data$N,
+                           stan_data$n,
+                           stan_data$n_ind,
+                           stan_data$ID_init,
+                           stan_data$ID,
+                           stan_data$x_duration_init,
+                           stan_data$x_surface_init,
+                           stan_data$x_maxDepth_init,
+                           stan_data$x_lunges_init,
+                           stan_data$x_step_init,
+                           stan_data$x_angle_init,
+                           stan_data$x_headVar_init,
+                           stan_data$x_exposure_init,
+                           stan_data$x_duration,
+                           stan_data$x_surface,
+                           stan_data$x_maxDepth,
+                           stan_data$x_lunges,
+                           stan_data$x_step,
+                           stan_data$x_angle,
+                           stan_data$x_headVar,
+                           stan_data$x_exposure,
+                           final_theta + noise)
+t2 = Sys.time()
+t2-t1
+#25647.4

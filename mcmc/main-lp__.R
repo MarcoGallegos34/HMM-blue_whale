@@ -10,9 +10,12 @@ source("data/dataPrep_functions.R")
 source("stan-input/stan-data_init-values-3.R")
 sourceCpp("mcmc/lp__v1_1.cpp")
 sourceCpp("mcmc/lp__v1_2.cpp")
+sourceCpp("mcmc/lp__v1_3.cpp")
 #sourceCpp("mcmc/lp__v1_2-debug.cpp")
 sourceCpp("mcmc/lp__v1_1-diagnostics.cpp")
 sourceCpp("mcmc/lp__v1_2-diagnostics.cpp")
+sourceCpp("mcmc/lp__v1_2-diagnosticsv2.cpp")
+sourceCpp("mcmc/lp__v1_2-within.cpp")
 sourceCpp("mcmc/lp__v1_1-conditionalMarginal.cpp")
 #sourceCpp("mcmc/lp__v1_1_step2.cpp")
 #sourceCpp("mcmc/lp__v1_1-debug.cpp")
@@ -99,8 +102,9 @@ t1 = Sys.time()
 t1
 set.seed(194)
 #armadillo_set_seed(10)
-sim_parallel_temp = rcpp_parallel_pt_cw_M_target_posterior(stan_data,nsim=100,init = theta_star_test_tempered, #init_tempered = matrix(rep(theta_star_test,10),
-                                                           temp_vector = as.numeric(4^(0:3)),
+sim_parallel_temp = rcpp_parallel_pt_cw_M_target_posterior(stan_data,nsim=1000,init = theta_star_test, 
+                                                           init_tempered = matrix(rep(theta_star_test_tempered,10),51,10),
+                                                           temp_vector = as.numeric(c(1.8^(0:7),100)),
                                                            #temp_vector = as.numeric(c(1:10)),
                                                            #data for parallel computing
                                                            stan_data$N,
@@ -121,7 +125,8 @@ sim_parallel_temp = rcpp_parallel_pt_cw_M_target_posterior(stan_data,nsim=100,in
                                                            stan_data$x_lunges,
                                                            stan_data$x_step,
                                                            stan_data$x_angle,
-                                                           stan_data$x_headVar)
+                                                           stan_data$x_headVar,
+                                                           within_temp = 20)
 t2 = Sys.time()
 (t2-t1) # For 100 it, 10 temps, this will abe aprox. 73 min, let's see if that happens
 # 1.5 hrs for 150 it, 10 temps. 
@@ -130,7 +135,7 @@ swap = sim_parallel_temp$swap
 swap_proposal = sim_parallel_temp$swap_proposal
 path_init = sim_parallel_temp$path_init
 swap_proposal
-plot(1:51,path_init[,4],type="s")
+plot(path_init[,3],type="s")
 mean(swap)
 path_init[1:12,]
 
@@ -140,13 +145,21 @@ sim_target = sim_parallel_temp$chains[[1]]
 sim_target = sim[[9]]
 #sim_target = sim_parallel_temp[[3]]
 
+plot(sim$path_init[,9],type="s")
+
+mean(sim$swap)
+
 sim_parallel_temp$chain1
 sim_parallel_temp$target_X_i
 sim_parallel_temp$target_proposal
 
-sim_target = sim_parallel_temp[[1]]
+plot(sim$path_init[,9],type="s")
+
+
+
+sim_target = sim_parallel_temp$chains[[1]]
 sim_target = sim_parallel_temp$chain1
-sim_target=sim_pt[[1]]
+sim_target=sim$chains[[1]]
 
 variable = c(rep("tpm1",2),
              rep("tpm2",2),
@@ -190,6 +203,9 @@ saveRDS(sim_pt_df,"mcmc/output_rcpp_parallel_pt_m_tidy-init2-conditional.rds")
 
 ### Using all variables
 
+sim_pt_df = readRDS("mcmc/output_rcpp_parallel_pt_m_c100-2temp_tidy-init1-hyperpars2-noSwap.rds")
+sim_pt_df = readRDS("mcmc/output_rcpp_parallel_pt_m_c2.1-2temp_tidy-init2-hyperpars2-noSwap.rds")
+sim_pt_df = readRDS("mcmc/output_rcpp_parallel_pt_m_8temp_tidy-init1-noPrior.rds")
 sim_pt_df = readRDS("mcmc/output_rcpp_parallel_pt_m_3temp_tidy-init1-hyperpars2.rds")
 sim_pt_df = readRDS("mcmc/output_rcpp_parallel_pt_m_7temp_tidy-init1-hyperpars2.rds")
 sim_pt_df = readRDS("mcmc/output_rcpp_parallel_pt_m_8temp_tidy-init1-hyperpars2.rds")
@@ -199,8 +215,11 @@ sim_pt_df = readRDS("mcmc/output_rcpp_parallel_pt_m_10temp_tidy-init2.rds")
 sim_pt_df = readRDS("mcmc/output_rcpp_parallel_pt_m_10temp_tidy-init1-noSwap.rds")
 sim_pt_df2 = readRDS("mcmc/output_rcpp_parallel_pt_m_10temp_tidy-init2-noSwap.rds")
 
+sim = readRDS("mcmc/output_rcpp_parallel_pt_m_c1.5-13temp-init1-hyperpars2-diagnostics.rds")
+sim = readRDS("mcmc/output_rcpp_parallel_pt_m_c1.8-9temp-init1-hyperpars2-diagnostics.rds")
 sim = readRDS("mcmc/output_rcpp_parallel_pt_m_10temp-init1-diagnostics.rds")
 sim = readRDS("mcmc/output_rcpp_parallel_pt_m_10temp-init2-diagnostics.rds")
+sim = readRDS("mcmc/output_rcpp_parallel_pt_m_8temp-init1-hyperpars2-diagnostics.rds")
 sim = readRDS("mcmc/output_rcpp_parallel_pt_m_10temp-init1-hyperpars2.rds")
 sim = readRDS("mcmc/output_rcpp_parallel_pt_m_3temp-init1-hyperpars2.rds")
 sim = readRDS("mcmc/output_rcpp_parallel_pt_m_8temp-init1-hyperpars2.rds")
@@ -230,9 +249,9 @@ sim_pt_df %>% filter(state == 3) %>% dplyr::select(iteration,
                                                    tpm2,
                                                    tpm3) %>% pivot_longer(-iteration,names_to="variable",
                                                                           values_to = "values") %>% 
-  #filter(iteration < 100) %>% 
-  ggplot(aes(x=iteration,y=values)) + facet_wrap(~variable,scales = "free_y") + geom_line()
-  #ggplot(aes(x=values)) + facet_wrap(~variable,scales="free") + geom_histogram()
+  #filter(iteration > 5001) %>% 
+  #ggplot(aes(x=iteration,y=values)) + facet_wrap(~variable,scales = "free_y") + geom_line()
+  ggplot(aes(x=values)) + facet_wrap(~variable,scales="free") + geom_histogram()
 
 sim_pt_df$chain = 1
 sim_pt_df2$chain = 2
@@ -324,13 +343,20 @@ for(i in 5002:20001){
 
 
 hist(sim_lp__)
-saveRDS(sim_lp__,"mcmc/sim_lp__10temp-init2-noSwap.rds")
+saveRDS(sim_lp__,"mcmc/sim_lp__init2.rds")
 
-sim_lp__1 = readRDS("mcmc/sim_lp__10temp-init1-noSwap.rds")
-sim_lp__2 = readRDS("mcmc/sim_lp__10temp-init2-noSwap.rds")
+# sim_lp__1 = readRDS("mcmc/sim_lp__10temp-init1-noSwap.rds")
+# sim_lp__2 = readRDS("mcmc/sim_lp__10temp-init2-noSwap.rds")
+sim_lp__1 = readRDS("mcmc/sim_lp__init1.rds")
+sim_lp__2 = readRDS("mcmc/sim_lp__init2.rds")
 
-sim_lp__ = rbind(cbind(sim_lp__1[6001:20001],1),cbind(sim_lp__2[6001:20001],2))
-tibble(lp__ = sim_lp__[,1],chain=sim_lp__[,2]) %>% ggplot(aes(x=lp__,fill=chain)) + geom_histogram(binwidth = 15)
+#sim_lp__ = rbind(cbind(sim_lp__1[6001:20001],1),cbind(sim_lp__2[6001:20001],2))
+sim_lp__ = rbind(cbind(sim_lp__1,1),cbind(sim_lp__2,2))
+tibble(lp__ = sim_lp__[,1],chain=factor(sim_lp__[,2])) %>% ggplot(aes(x=lp__,fill=chain)) + 
+  geom_histogram(binwidth = 4)
+
+tibble(lp__ = sim_lp__[,1],chain=factor(sim_lp__[,2])) %>% ggplot(aes(x=lp__,fill=chain)) + 
+  geom_histogram(binwidth = 15)
 
 length(sim_lp__1)
 
@@ -436,3 +462,10 @@ min(sim_lp__2)
 # seed 9 -> 731 (25671.1354)
 # seed 10 -> 719 (25705.2286)
 
+# sim_pt_df %>% pivot_longer(-c(state,iteration),names_to="parameter",values_to="value") %>% 
+#   filter(value < 0)
+# 
+# sim_pt_df %>% filter(lambda < 0 | a < 0 | b < 0) %>% 
+#   dplyr::select(iteration,state,lambda,a,b)
+# 
+# 

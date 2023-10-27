@@ -397,34 +397,85 @@ struct SemiMleExtended : public Functor {
 
             if(k == 0){
                 // Creation tpm k = 1
-                tpm(1-1,1-1) =                                                      1/(1 + (exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i])));
-                tpm(1-1,2-1) = exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i])/(1 + (exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i])));
-                tpm(1-1,3-1) = exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i])/(1 + (exp(theta_star[1-1] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[73-ll]*x_exposure[i])));
+                tpm(1-1,1-1) =                                                     1/(1 + (exp(theta_star[1-1] + theta_star[36-1]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[37-1]*x_exposure[i])));
+                tpm(1-1,2-1) = exp(theta_star[1-1] + theta_star[36-1]*x_exposure[i])/(1 + (exp(theta_star[1-1] + theta_star[36-1]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[37-1]*x_exposure[i])));
+                tpm(1-1,3-1) = exp(theta_star[2-1] + theta_star[37-1]*x_exposure[i])/(1 + (exp(theta_star[1-1] + theta_star[36-1]*x_exposure[i]) + exp(theta_star[2-1] + theta_star[37-1]*x_exposure[i])));
 
-                tpm(2-1,1-1) = exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i])/(1 + (exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i])));
-                tpm(2-1,2-1) =                                                      1/(1 + (exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i])));
-                tpm(2-1,3-1) = exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i])/(1 + (exp(theta_star[3-1] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[75-ll]*x_exposure[i])));
+                tpm(2-1,1-1) = exp(theta_star[3-1] + theta_star[38-1]*x_exposure[i])/(1 + (exp(theta_star[3-1] + theta_star[38-1]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[39-1]*x_exposure[i])));
+                tpm(2-1,2-1) =                                                     1/(1 + (exp(theta_star[3-1] + theta_star[38-1]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[39-1]*x_exposure[i])));
+                tpm(2-1,3-1) = exp(theta_star[4-1] + theta_star[39-1]*x_exposure[i])/(1 + (exp(theta_star[3-1] + theta_star[38-1]*x_exposure[i]) + exp(theta_star[4-1] + theta_star[39-1]*x_exposure[i])));
 
-                tpm(3-1,1-1) = exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i])/(1 + (exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i])));
-                tpm(3-1,2-1) = exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i])/(1 + (exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i])));
-                tpm(3-1,3-1) =                                                      1/(1 + (exp(theta_star[5-1] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[77-ll]*x_exposure[i])));
+                tpm(3-1,1-1) = exp(theta_star[5-1] + theta_star[40-1]*x_exposure[i])/(1 + (exp(theta_star[5-1] + theta_star[40-1]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[41-1]*x_exposure[i])));
+                tpm(3-1,2-1) = exp(theta_star[6-1] + theta_star[41-1]*x_exposure[i])/(1 + (exp(theta_star[5-1] + theta_star[40-1]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[41-1]*x_exposure[i])));
+                tpm(3-1,3-1) =                                                     1/(1 + (exp(theta_star[5-1] + theta_star[40-1]*x_exposure[i]) + exp(theta_star[6-1] + theta_star[41-1]*x_exposure[i])));
 
-            } else {
-                int l = 47 - ll; // ll = 37
-                l += 9*(k-1); 
-                tpm(1-1,1-1) =                                                      1/(1 + (exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])));
-                tpm(1-1,2-1) = exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i])/(1 + (exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])));
-                tpm(1-1,3-1) = exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])/(1 + (exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])));
+            } 
+            
+            if(k == 1){
+                // Creation tpm k = 2
+                tpm(1-1,1-1) =                                                      1/(1 + (exp(theta_star[12-1] + theta_star[36-1]*x_exposure[i]) + exp(theta_star[13-1] + theta_star[37-1]*x_exposure[i])));
+                tpm(1-1,2-1) = exp(theta_star[12-1] + theta_star[36-1]*x_exposure[i])/(1 + (exp(theta_star[12-1] + theta_star[36-1]*x_exposure[i]) + exp(theta_star[13-1] + theta_star[37-1]*x_exposure[i])));
+                tpm(1-1,3-1) = exp(theta_star[13-1] + theta_star[37-1]*x_exposure[i])/(1 + (exp(theta_star[12-1] + theta_star[36-1]*x_exposure[i]) + exp(theta_star[13-1] + theta_star[37-1]*x_exposure[i])));
 
-                tpm(2-1,1-1) = exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i])/(1 + (exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])));
-                tpm(2-1,2-1) =                                                      1/(1 + (exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])));
-                tpm(2-1,3-1) = exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])/(1 + (exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])));
+                tpm(2-1,1-1) = exp(theta_star[14-1] + theta_star[38-1]*x_exposure[i])/(1 + (exp(theta_star[14-1] + theta_star[38-1]*x_exposure[i]) + exp(theta_star[15-1] + theta_star[39-1]*x_exposure[i])));
+                tpm(2-1,2-1) =                                                      1/(1 + (exp(theta_star[14-1] + theta_star[38-1]*x_exposure[i]) + exp(theta_star[15-1] + theta_star[39-1]*x_exposure[i])));
+                tpm(2-1,3-1) = exp(theta_star[15-1] + theta_star[39-1]*x_exposure[i])/(1 + (exp(theta_star[14-1] + theta_star[38-1]*x_exposure[i]) + exp(theta_star[15-1] + theta_star[39-1]*x_exposure[i])));
 
-                tpm(3-1,1-1) = exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i])/(1 + (exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])));
-                tpm(3-1,2-1) = exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])/(1 + (exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])));
-                tpm(3-1,3-1) =                                                      1/(1 + (exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])));
+                tpm(3-1,1-1) = exp(theta_star[16-1] + theta_star[40-1]*x_exposure[i])/(1 + (exp(theta_star[16-1] + theta_star[40-1]*x_exposure[i]) + exp(theta_star[17-1] + theta_star[41-1]*x_exposure[i])));
+                tpm(3-1,2-1) = exp(theta_star[17-1] + theta_star[41-1]*x_exposure[i])/(1 + (exp(theta_star[16-1] + theta_star[40-1]*x_exposure[i]) + exp(theta_star[17-1] + theta_star[41-1]*x_exposure[i])));
+                tpm(3-1,3-1) =                                                      1/(1 + (exp(theta_star[16-1] + theta_star[40-1]*x_exposure[i]) + exp(theta_star[17-1] + theta_star[41-1]*x_exposure[i])));
 
             }
+            
+            if(k == 2){
+                // Creation tpm k = 3
+                tpm(1-1,1-1) =                                                      1/(1 + (exp(theta_star[21-1] + theta_star[36-1]*x_exposure[i]) + exp(theta_star[22-1] + theta_star[37-1]*x_exposure[i])));
+                tpm(1-1,2-1) = exp(theta_star[21-1] + theta_star[36-1]*x_exposure[i])/(1 + (exp(theta_star[21-1] + theta_star[36-1]*x_exposure[i]) + exp(theta_star[22-1] + theta_star[37-1]*x_exposure[i])));
+                tpm(1-1,3-1) = exp(theta_star[22-1] + theta_star[37-1]*x_exposure[i])/(1 + (exp(theta_star[21-1] + theta_star[36-1]*x_exposure[i]) + exp(theta_star[22-1] + theta_star[37-1]*x_exposure[i])));
+
+                tpm(2-1,1-1) = exp(theta_star[23-1] + theta_star[38-1]*x_exposure[i])/(1 + (exp(theta_star[23-1] + theta_star[38-1]*x_exposure[i]) + exp(theta_star[24-1] + theta_star[39-1]*x_exposure[i])));
+                tpm(2-1,2-1) =                                                      1/(1 + (exp(theta_star[23-1] + theta_star[38-1]*x_exposure[i]) + exp(theta_star[24-1] + theta_star[39-1]*x_exposure[i])));
+                tpm(2-1,3-1) = exp(theta_star[24-1] + theta_star[39-1]*x_exposure[i])/(1 + (exp(theta_star[23-1] + theta_star[38-1]*x_exposure[i]) + exp(theta_star[24-1] + theta_star[39-1]*x_exposure[i])));
+
+                tpm(3-1,1-1) = exp(theta_star[25-1] + theta_star[40-1]*x_exposure[i])/(1 + (exp(theta_star[25-1] + theta_star[40-1]*x_exposure[i]) + exp(theta_star[26-1] + theta_star[41-1]*x_exposure[i])));
+                tpm(3-1,2-1) = exp(theta_star[26-1] + theta_star[41-1]*x_exposure[i])/(1 + (exp(theta_star[25-1] + theta_star[40-1]*x_exposure[i]) + exp(theta_star[26-1] + theta_star[41-1]*x_exposure[i])));
+                tpm(3-1,3-1) =                                                      1/(1 + (exp(theta_star[25-1] + theta_star[40-1]*x_exposure[i]) + exp(theta_star[26-1] + theta_star[41-1]*x_exposure[i])));
+
+            }
+            
+            if(k == 3){
+                // Creation tpm k = 4
+                tpm(1-1,1-1) =                                                      1/(1 + (exp(theta_star[30-1] + theta_star[36-1]*x_exposure[i]) + exp(theta_star[31-1] + theta_star[37-1]*x_exposure[i])));
+                tpm(1-1,2-1) = exp(theta_star[30-1] + theta_star[36-1]*x_exposure[i])/(1 + (exp(theta_star[30-1] + theta_star[36-1]*x_exposure[i]) + exp(theta_star[31-1] + theta_star[37-1]*x_exposure[i])));
+                tpm(1-1,3-1) = exp(theta_star[31-1] + theta_star[37-1]*x_exposure[i])/(1 + (exp(theta_star[30-1] + theta_star[36-1]*x_exposure[i]) + exp(theta_star[31-1] + theta_star[37-1]*x_exposure[i])));
+
+                tpm(2-1,1-1) = exp(theta_star[32-1] + theta_star[38-1]*x_exposure[i])/(1 + (exp(theta_star[32-1] + theta_star[38-1]*x_exposure[i]) + exp(theta_star[33-1] + theta_star[39-1]*x_exposure[i])));
+                tpm(2-1,2-1) =                                                      1/(1 + (exp(theta_star[32-1] + theta_star[38-1]*x_exposure[i]) + exp(theta_star[33-1] + theta_star[39-1]*x_exposure[i])));
+                tpm(2-1,3-1) = exp(theta_star[33-1] + theta_star[39-1]*x_exposure[i])/(1 + (exp(theta_star[32-1] + theta_star[38-1]*x_exposure[i]) + exp(theta_star[33-1] + theta_star[39-1]*x_exposure[i])));
+
+                tpm(3-1,1-1) = exp(theta_star[34-1] + theta_star[40-1]*x_exposure[i])/(1 + (exp(theta_star[34-1] + theta_star[40-1]*x_exposure[i]) + exp(theta_star[35-1] + theta_star[41-1]*x_exposure[i])));
+                tpm(3-1,2-1) = exp(theta_star[35-1] + theta_star[41-1]*x_exposure[i])/(1 + (exp(theta_star[34-1] + theta_star[40-1]*x_exposure[i]) + exp(theta_star[35-1] + theta_star[41-1]*x_exposure[i])));
+                tpm(3-1,3-1) =                                                      1/(1 + (exp(theta_star[34-1] + theta_star[40-1]*x_exposure[i]) + exp(theta_star[35-1] + theta_star[41-1]*x_exposure[i])));
+
+            }
+            
+            
+            // else {
+            //     int l = 47 - ll; // ll = 37
+            //     l += 9*(k-1); 
+            //     tpm(1-1,1-1) =                                                      1/(1 + (exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])));
+            //     tpm(1-1,2-1) = exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i])/(1 + (exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])));
+            //     tpm(1-1,3-1) = exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])/(1 + (exp(theta_star[1+l] + theta_star[72-ll]*x_exposure[i]) + exp(theta_star[2+l] + theta_star[73-ll]*x_exposure[i])));
+
+            //     tpm(2-1,1-1) = exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i])/(1 + (exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])));
+            //     tpm(2-1,2-1) =                                                      1/(1 + (exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])));
+            //     tpm(2-1,3-1) = exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])/(1 + (exp(theta_star[3+l] + theta_star[74-ll]*x_exposure[i]) + exp(theta_star[4+l] + theta_star[75-ll]*x_exposure[i])));
+
+            //     tpm(3-1,1-1) = exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i])/(1 + (exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])));
+            //     tpm(3-1,2-1) = exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])/(1 + (exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])));
+            //     tpm(3-1,3-1) =                                                      1/(1 + (exp(theta_star[5+l] + theta_star[76-ll]*x_exposure[i]) + exp(theta_star[6+l] + theta_star[77-ll]*x_exposure[i])));
+
+            // }
 
 
             // if(k == 0){

@@ -809,6 +809,10 @@ NumericVector proposal_dist(const NumericVector theta_star, const int N = 3){
         
     }
 
+    NumericVector ordered_new_mu_duration = new_mu_duration.sort();
+    NumericVector ordered_new_mu_maxDepth = new_mu_maxDepth.sort();
+    NumericVector ordered_new_mu_step = new_mu_step.sort();
+
     // Proposals for initial state distribution and tpm rows
     new_init = next_point(init);
     new_tpm1 = next_point(tpm1);
@@ -820,13 +824,16 @@ NumericVector proposal_dist(const NumericVector theta_star, const int N = 3){
 
     for(int i=0; i<N; i++){
 
-        new_theta_star[i+6] = new_mu_duration[i];
+        // new_theta_star[i+6] = new_mu_duration[i];
+        new_theta_star[i+6] = ordered_new_mu_duration[i];
         new_theta_star[i+9] = new_sigma_duration[i];
         new_theta_star[i+12] = new_mu_surface[i];
         new_theta_star[i+15] = new_sigma_surface[i];
-        new_theta_star[i+18] = new_mu_maxDepth[i];
+        // new_theta_star[i+18] = new_mu_maxDepth[i];
+        new_theta_star[i+18] = ordered_new_mu_maxDepth[i];
         new_theta_star[i+21] = new_sigma_maxDepth[i];
-        new_theta_star[i+24] = new_mu_step[i];
+        // new_theta_star[i+24] = new_mu_step[i];
+        new_theta_star[i+24] = ordered_new_mu_step[i];
         new_theta_star[i+27] = new_sigma_step[i];
         new_theta_star[i+24] = new_mu_step[i];
         new_theta_star[i+27] = new_sigma_step[i];
@@ -1379,7 +1386,6 @@ double log_lik_stdVector(const int N,  // Number of hidden states
 }
 
 // (Unnormalilzed) log-posterior of theta_star given data
-// [[Rcpp::export]]
 double lp__stdVector(const int N,
                     const int n,
                     const int n_ind,
@@ -2357,7 +2363,7 @@ List rcpp_parallel_pt_cw_M_target_posterior(const List list_data,
 
             // tempered target at current iteration
             // double target_at_X_i = target_tau(list_data, aux_X(_,i),temp_vector[temp],temp_vector[temp_vector.size()-1]);
-            
+
             double target_at_X_i = lp__stdVector(N,
                     n,
                     n_ind,
@@ -2378,6 +2384,7 @@ List rcpp_parallel_pt_cw_M_target_posterior(const List list_data,
                     x_angle,
                     x_headVar,
                     aux_X(_,i))/temp_vector[temp];
+
 
             // component-wise for tpms and initial distribution
             //  component-wise step for tpm1 (tpm row 1)
@@ -2617,106 +2624,23 @@ List rcpp_parallel_pt_cw_M_target_posterior(const List list_data,
         }
 
         // Choose randomly one of the chains
-        int j = floor(R::runif(0,1)*(temp_vector.size()-1));
+        // int j = floor(R::runif(0,1)*(temp_vector.size()-1));
+        int j = floor(R::runif(0,1)*(temp_vector.size()));
         int k = j + 1; // Proposed Swap;
         double log_U_swap = log(R::runif(0,1));
 
-        // Auxiliary matrices where we will extract the values to be swapped
-        NumericMatrix X_j = X[j];
-        NumericMatrix X_k = X[k];
+        // // Auxiliary matrices where we will extract the values to be swapped
+        // NumericMatrix X_j = X[j];
+        // NumericMatrix X_k = X[k];
         // double ratio = target_tau(list_data, X_j(_,i+1), k,temp_vector[temp_vector.size()-1]) + target_tau(list_data, X_k(_,i+1), j,temp_vector[temp_vector.size()-1]) - 
         //                 (target_tau(list_data, X_j(_,i+1), j,temp_vector[temp_vector.size()-1]) + target_tau(list_data, X_k(_,i+1), k,temp_vector[temp_vector.size()-1]));
-        double ratio = 0.0;
-        ratio += lp__stdVector(N,
-                    n,
-                    n_ind,
-                    ID_init,
-                    ID,
-                    x_duration_init,
-                    x_surface_init,
-                    x_maxDepth_init,
-                    x_lunges_init,
-                    x_step_init,
-                    x_angle_init,
-                    x_headVar_init,
-                    x_duration,
-                    x_surface,
-                    x_maxDepth,
-                    x_lunges,
-                    x_step,
-                    x_angle,
-                    x_headVar,
-                    X_j(_,i+1))/temp_vector[k];
-
-        ratio += lp__stdVector(N,
-                    n,
-                    n_ind,
-                    ID_init,
-                    ID,
-                    x_duration_init,
-                    x_surface_init,
-                    x_maxDepth_init,
-                    x_lunges_init,
-                    x_step_init,
-                    x_angle_init,
-                    x_headVar_init,
-                    x_duration,
-                    x_surface,
-                    x_maxDepth,
-                    x_lunges,
-                    x_step,
-                    x_angle,
-                    x_headVar,
-                    X_k(_,i+1))/temp_vector[j];
-
-        ratio -= lp__stdVector(N,
-                    n,
-                    n_ind,
-                    ID_init,
-                    ID,
-                    x_duration_init,
-                    x_surface_init,
-                    x_maxDepth_init,
-                    x_lunges_init,
-                    x_step_init,
-                    x_angle_init,
-                    x_headVar_init,
-                    x_duration,
-                    x_surface,
-                    x_maxDepth,
-                    x_lunges,
-                    x_step,
-                    x_angle,
-                    x_headVar,
-                    X_j(_,i+1))/temp_vector[j];
-
-        ratio -= lp__stdVector(N,
-                    n,
-                    n_ind,
-                    ID_init,
-                    ID,
-                    x_duration_init,
-                    x_surface_init,
-                    x_maxDepth_init,
-                    x_lunges_init,
-                    x_step_init,
-                    x_angle_init,
-                    x_headVar_init,
-                    x_duration,
-                    x_surface,
-                    x_maxDepth,
-                    x_lunges,
-                    x_step,
-                    x_angle,
-                    x_headVar,
-                    X_k(_,i+1))/temp_vector[k];
 
 
-        if(log_U_swap  < ratio){
-            NumericVector tmpval = X_j(_,i+1);
-            X_j(_,i+1) = X_k(_,i+1);
-            X_k(_,i+1) = tmpval; // Accept Swap;
-        }
+        // if(log_U_swap  < ratio){
+        //     NumericVector tmpval = X_j(_,i+1);
+        //     X_j(_,i+1) = X_k(_,i+1);
+        //     X_k(_,i+1) = tmpval; // Accept Swap;
+        // }
     }
 
     return X;

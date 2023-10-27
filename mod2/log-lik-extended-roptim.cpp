@@ -196,115 +196,190 @@ struct Mle : public Functor {
     // # weights pi_
     arma::Col<double> theta(K); //   estimate[45-ll];
     if(K == 2){
-        theta[2-1] = exp(theta_star[45-ll])/(1+exp(theta_star[45-ll])); // ll = 36 - 1
-        theta[1-1] = 1 - theta[2-1];
+        // theta[2-1] = exp(theta_star[45-ll])/(1+exp(theta_star[45-ll])); // ll = 36 - 1
+        // theta[1-1] = 1 - theta[2-1];
+        arma::Col<double> theta_raw2 = {theta_star[45-ll]};
+        theta[1-1] = 1/(1 + exp(theta_raw2[1-1]));
+        theta[2-1] = exp(theta_raw2[1-1])/(1 + exp(theta_raw2[1-1]));
 
     }
 
   if(K == 3){
     arma::Col<double> theta_raw2 = {theta_star[45-ll],theta_star[54-ll]};
-    theta[2-1] = 1/(1+exp(-theta_raw2[1-1]));
-    theta[3-1] = 1/(1+exp(-theta_raw2[2-1]));
-    theta[1-1] = 1 - (theta[2-1] + theta[3-1]);
+    // theta[2-1] = 1/(1+exp(-theta_raw2[1-1]));
+    // theta[3-1] = 1/(1+exp(-theta_raw2[2-1]));
+    // theta[1-1] = 1 - (theta[2-1] + theta[3-1]);
+    theta[1-1] = 1/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]));
+    theta[2-1] = exp(theta_raw2[1-1])/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]));
+    theta[3-1] = exp(theta_raw2[2-1])/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]));
     
   }
   
   if(K == 4){
     arma::Col<double> theta_raw2 = {theta_star[45-ll],theta_star[54-ll],theta_star[63-ll]};
-    theta[2-1] = 1/(1+exp(-theta_raw2[1-1]));
-    theta[3-1] = 1/(1+exp(-theta_raw2[2-1]));
-    theta[4-1] = 1/(1+exp(-theta_raw2[3-1]));
-    theta[1-1] = 1 - (theta[2-1] + theta[3-1] + theta[4-1]);
-    
+    // theta[2-1] = 1/(1+exp(-theta_raw2[1-1]));
+    // theta[3-1] = 1/(1+exp(-theta_raw2[2-1]));
+    // theta[4-1] = 1/(1+exp(-theta_raw2[3-1]));
+    // theta[1-1] = 1 - (theta[2-1] + theta[3-1] + theta[4-1]);
+    theta[1-1] = 1/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
+    theta[2-1] = exp(theta_raw2[1-1])/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
+    theta[3-1] = exp(theta_raw2[2-1])/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
+    theta[4-1] = exp(theta_raw2[3-1])/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]));
+
   }
   
   if(K == 5){
     arma::Col<double> theta_raw2 = {theta_star[45-ll],theta_star[54-ll],theta_star[63-ll],theta_star[72-ll]};
-    theta[2-1] = 1/(1+exp(-theta_raw2[1-1]));
-    theta[3-1] = 1/(1+exp(-theta_raw2[2-1]));
-    theta[4-1] = 1/(1+exp(-theta_raw2[3-1]));
-    theta[5-1] = 1/(1+exp(-theta_raw2[4-1]));
-    theta[1-1] = 1 - (theta[2-1] + theta[3-1] + theta[4-1] + theta[5-1]);
-    
+    // theta[2-1] = 1/(1+exp(-theta_raw2[1-1]));
+    // theta[3-1] = 1/(1+exp(-theta_raw2[2-1]));
+    // theta[4-1] = 1/(1+exp(-theta_raw2[3-1]));
+    // theta[5-1] = 1/(1+exp(-theta_raw2[4-1]));
+    // theta[1-1] = 1 - (theta[2-1] + theta[3-1] + theta[4-1] + theta[5-1]);
+    theta[1-1] = 1/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]) + exp(theta_raw2[4-1]));
+    theta[2-1] = exp(theta_raw2[1-1])/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]) + exp(theta_raw2[4-1]));
+    theta[3-1] = exp(theta_raw2[2-1])/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]) + exp(theta_raw2[4-1]));
+    theta[4-1] = exp(theta_raw2[3-1])/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]) + exp(theta_raw2[4-1]));
+    theta[5-1] = exp(theta_raw2[4-1])/(1 + exp(theta_raw2[1-1]) + exp(theta_raw2[2-1]) + exp(theta_raw2[3-1]) + exp(theta_raw2[4-1]));
+
   }
+
     
     // return theta;
     
     // # init
     arma::mat init(K,N);
-    init(1-1,2-1) = exp(init_raw[1-1])/(1+exp(init_raw[1-1]));
-    init(1-1,3-1) = exp(init_raw[2-1])/(1+exp(init_raw[2-1]));
-    init(1-1,1-1) = 1 - (init(1-1,2-1) + init(1-1,3-1));
+    // init(1-1,2-1) = exp(init_raw[1-1])/(1+exp(init_raw[1-1]));
+    // init(1-1,3-1) = exp(init_raw[2-1])/(1+exp(init_raw[2-1]));
+    // init(1-1,1-1) = 1 - (init(1-1,2-1) + init(1-1,3-1));
+    init(1-1,1-1) = 1/(1 + exp(init_raw[1-1]) + exp(init_raw[2-1]));
+    init(1-1,2-1) = exp(init_raw[1-1])/(1 + exp(init_raw[1-1]) + exp(init_raw[2-1]));
+    init(1-1,3-1) = exp(init_raw[2-1])/(1 + exp(init_raw[1-1]) + exp(init_raw[2-1]));
+
     
     
     if(K == 2){
-        arma::Col<double> init_raw2 = {theta_star[46-ll], theta_star[47-ll]};
-        // NumericVector init_raw2(N-1); //[(46-ll):(47-ll)];
-        // init_raw2 = {theta_star[46-ll], theta_star[47-ll]};
-        init(2-1,2-1) = exp(init_raw2[1-1])/(1+exp(init_raw2[1-1]));
-        init(2-1,3-1) = exp(init_raw2[2-1])/(1+exp(init_raw2[2-1]));
-        init(2-1,1-1) = 1 - (init(2-1,2-1) + init(2-1,3-1));
-        
+        // arma::Col<double> init_raw2 = {theta_star[46-ll], theta_star[47-ll]};
+        // // NumericVector init_raw2(N-1); //[(46-ll):(47-ll)];
+        // // init_raw2 = {theta_star[46-ll], theta_star[47-ll]};
+        // init(2-1,2-1) = exp(init_raw2[1-1])/(1+exp(init_raw2[1-1]));
+        // init(2-1,3-1) = exp(init_raw2[2-1])/(1+exp(init_raw2[2-1]));
+        // init(2-1,1-1) = 1 - (init(2-1,2-1) + init(2-1,3-1));
+
+        arma::Col<double> init_raw2 = {theta_star[46-ll],theta_star[47-ll]};
+        init(2-1,1-1) = 1/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
+        init(2-1,2-1) = exp(init_raw2[1-1])/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
+        init(2-1,3-1) = exp(init_raw2[2-1])/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
+
     }
 
     if(K == 3){
         
+        // arma::Col<double> init_raw2 = {theta_star[46-ll],theta_star[47-ll]};
+        // init(2-1,2-1) = 1/(1+exp(-init_raw2[1-1]));
+        // init(2-1,3-1) = 1/(1+exp(-init_raw2[2-1]));
+        // init(2-1,1-1) = 1 - (init(2-1,2-1) + init(2-1,3-1));
+        
+        
+        // arma::Col<double> init_raw3 = {theta_star[55-ll],theta_star[56-ll]};
+        // init(3-1,2-1) = 1/(1+exp(-init_raw3[1-1]));
+        // init(3-1,3-1) = 1/(1+exp(-init_raw3[2-1]));
+        // init(3-1,1-1) = 1 - (init(3-1,2-1) + init(3-1,3-1));
+
         arma::Col<double> init_raw2 = {theta_star[46-ll],theta_star[47-ll]};
-        init(2-1,2-1) = 1/(1+exp(-init_raw2[1-1]));
-        init(2-1,3-1) = 1/(1+exp(-init_raw2[2-1]));
-        init(2-1,1-1) = 1 - (init(2-1,2-1) + init(2-1,3-1));
-        
-        
+        init(2-1,1-1) = 1/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
+        init(2-1,2-1) = exp(init_raw2[1-1])/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
+        init(2-1,3-1) = exp(init_raw2[2-1])/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
+
+
         arma::Col<double> init_raw3 = {theta_star[55-ll],theta_star[56-ll]};
-        init(3-1,2-1) = 1/(1+exp(-init_raw3[1-1]));
-        init(3-1,3-1) = 1/(1+exp(-init_raw3[2-1]));
-        init(3-1,1-1) = 1 - (init(3-1,2-1) + init(3-1,3-1));
+        init(3-1,1-1) = 1/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
+        init(3-1,2-1) = exp(init_raw3[1-1])/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
+        init(3-1,3-1) = exp(init_raw3[2-1])/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
         
     }
     
     if(K == 4){
         
+        // arma::Col<double> init_raw2 = {theta_star[46-ll],theta_star[47-ll]};
+        // init(2-1,2-1) = 1/(1+exp(-init_raw2[1-1]));
+        // init(2-1,3-1) = 1/(1+exp(-init_raw2[2-1]));
+        // init(2-1,1-1) = 1 - (init(2-1,2-1) + init(2-1,3-1));
+        
+        
+        // arma::Col<double> init_raw3 = {theta_star[55-ll],theta_star[56-ll]};
+        // init(3-1,2-1) = 1/(1+exp(-init_raw3[1-1]));
+        // init(3-1,3-1) = 1/(1+exp(-init_raw3[2-1]));
+        // init(3-1,1-1) = 1 - (init(3-1,2-1) + init(3-1,3-1));
+        
+        // arma::Col<double> init_raw4 = {theta_star[64-ll],theta_star[65-ll]};
+        // init(4-1,2-1) = 1/(1+exp(-init_raw4[1-1]));
+        // init(4-1,3-1) = 1/(1+exp(-init_raw4[2-1]));
+        // init(4-1,1-1) = 1 - (init(4-1,2-1) + init(4-1,3-1));
+
         arma::Col<double> init_raw2 = {theta_star[46-ll],theta_star[47-ll]};
-        init(2-1,2-1) = 1/(1+exp(-init_raw2[1-1]));
-        init(2-1,3-1) = 1/(1+exp(-init_raw2[2-1]));
-        init(2-1,1-1) = 1 - (init(2-1,2-1) + init(2-1,3-1));
+        init(2-1,1-1) = 1/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
+        init(2-1,2-1) = exp(init_raw2[1-1])/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
+        init(2-1,3-1) = exp(init_raw2[2-1])/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
         
         
         arma::Col<double> init_raw3 = {theta_star[55-ll],theta_star[56-ll]};
-        init(3-1,2-1) = 1/(1+exp(-init_raw3[1-1]));
-        init(3-1,3-1) = 1/(1+exp(-init_raw3[2-1]));
-        init(3-1,1-1) = 1 - (init(3-1,2-1) + init(3-1,3-1));
-        
+        init(3-1,1-1) = 1/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
+        init(3-1,2-1) = exp(init_raw3[1-1])/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
+        init(3-1,3-1) = exp(init_raw3[2-1])/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
+
+
         arma::Col<double> init_raw4 = {theta_star[64-ll],theta_star[65-ll]};
-        init(4-1,2-1) = 1/(1+exp(-init_raw4[1-1]));
-        init(4-1,3-1) = 1/(1+exp(-init_raw4[2-1]));
-        init(4-1,1-1) = 1 - (init(4-1,2-1) + init(4-1,3-1));
-        
+        init(4-1,1-1) =                   1/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
+        init(4-1,2-1) = exp(init_raw4[1-1])/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
+        init(4-1,3-1) = exp(init_raw4[2-1])/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
+
+
     }
     
     if(K == 5){
         
+        // arma::Col<double> init_raw2 = {theta_star[46-ll],theta_star[47-ll]};
+        // init(2-1,2-1) = 1/(1+exp(-init_raw2[1-1]));
+        // init(2-1,3-1) = 1/(1+exp(-init_raw2[2-1]));
+        // init(2-1,1-1) = 1 - (init(2-1,2-1) + init(2-1,3-1));
+        
+        
+        // arma::Col<double> init_raw3 = {theta_star[55-ll],theta_star[56-ll]};
+        // init(3-1,2-1) = 1/(1+exp(-init_raw3[1-1]));
+        // init(3-1,3-1) = 1/(1+exp(-init_raw3[2-1]));
+        // init(3-1,1-1) = 1 - (init(3-1,2-1) + init(3-1,3-1));
+        
+        // arma::Col<double> init_raw4 = {theta_star[64-ll],theta_star[65-ll]};
+        // init(4-1,2-1) = 1/(1+exp(-init_raw4[1-1]));
+        // init(4-1,3-1) = 1/(1+exp(-init_raw4[2-1]));
+        // init(4-1,1-1) = 1 - (init(4-1,2-1) + init(4-1,3-1));
+        
+        // arma::Col<double> init_raw5 = {theta_star[73-ll],theta_star[74-ll]};
+        // init(5-1,2-1) = 1/(1+exp(-init_raw5[1-1]));
+        // init(5-1,3-1) = 1/(1+exp(-init_raw5[2-1]));
+        // init(5-1,1-1) = 1 - (init(5-1,2-1) + init(5-1,3-1));
+
         arma::Col<double> init_raw2 = {theta_star[46-ll],theta_star[47-ll]};
-        init(2-1,2-1) = 1/(1+exp(-init_raw2[1-1]));
-        init(2-1,3-1) = 1/(1+exp(-init_raw2[2-1]));
-        init(2-1,1-1) = 1 - (init(2-1,2-1) + init(2-1,3-1));
+        init(2-1,1-1) =                   1/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
+        init(2-1,2-1) = exp(init_raw2[1-1])/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
+        init(2-1,3-1) = exp(init_raw2[2-1])/(1 + exp(init_raw2[1-1]) + exp(init_raw2[2-1]));
         
         
         arma::Col<double> init_raw3 = {theta_star[55-ll],theta_star[56-ll]};
-        init(3-1,2-1) = 1/(1+exp(-init_raw3[1-1]));
-        init(3-1,3-1) = 1/(1+exp(-init_raw3[2-1]));
-        init(3-1,1-1) = 1 - (init(3-1,2-1) + init(3-1,3-1));
-        
+        init(3-1,1-1) =                   1/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
+        init(3-1,2-1) = exp(init_raw3[1-1])/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
+        init(3-1,3-1) = exp(init_raw3[2-1])/(1 + exp(init_raw3[1-1]) + exp(init_raw3[2-1]));
+
+
         arma::Col<double> init_raw4 = {theta_star[64-ll],theta_star[65-ll]};
-        init(4-1,2-1) = 1/(1+exp(-init_raw4[1-1]));
-        init(4-1,3-1) = 1/(1+exp(-init_raw4[2-1]));
-        init(4-1,1-1) = 1 - (init(4-1,2-1) + init(4-1,3-1));
+        init(4-1,1-1) =                   1/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
+        init(4-1,2-1) = exp(init_raw4[1-1])/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
+        init(4-1,3-1) = exp(init_raw4[2-1])/(1 + exp(init_raw4[1-1]) + exp(init_raw4[2-1]));
         
         arma::Col<double> init_raw5 = {theta_star[73-ll],theta_star[74-ll]};
-        init(5-1,2-1) = 1/(1+exp(-init_raw5[1-1]));
-        init(5-1,3-1) = 1/(1+exp(-init_raw5[2-1]));
-        init(5-1,1-1) = 1 - (init(5-1,2-1) + init(5-1,3-1));
-        
+        init(5-1,1-1) =                   1/(1 + exp(init_raw5[1-1]) + exp(init_raw5[2-1]));
+        init(5-1,2-1) = exp(init_raw5[1-1])/(1 + exp(init_raw5[1-1]) + exp(init_raw5[2-1]));
+        init(5-1,3-1) = exp(init_raw5[2-1])/(1 + exp(init_raw5[1-1]) + exp(init_raw5[2-1]));
     }
     
     
