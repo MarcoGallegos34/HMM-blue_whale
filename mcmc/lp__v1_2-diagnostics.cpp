@@ -809,6 +809,10 @@ NumericVector proposal_dist(const NumericVector theta_star, const int N = 3){
         
     }
 
+    NumericVector ordered_new_mu_duration = new_mu_duration.sort();
+    NumericVector ordered_new_mu_maxDepth = new_mu_maxDepth.sort();
+    NumericVector ordered_new_mu_step = new_mu_step.sort();
+
     // Proposals for initial state distribution and tpm rows
     new_init = next_point(init);
     new_tpm1 = next_point(tpm1);
@@ -820,15 +824,16 @@ NumericVector proposal_dist(const NumericVector theta_star, const int N = 3){
 
     for(int i=0; i<N; i++){
 
-        new_theta_star[i+6] = new_mu_duration[i];
+        // new_theta_star[i+6] = new_mu_duration[i];
+        new_theta_star[i+6] = ordered_new_mu_duration[i];
         new_theta_star[i+9] = new_sigma_duration[i];
         new_theta_star[i+12] = new_mu_surface[i];
         new_theta_star[i+15] = new_sigma_surface[i];
-        new_theta_star[i+18] = new_mu_maxDepth[i];
+        // new_theta_star[i+18] = new_mu_maxDepth[i];
+        new_theta_star[i+18] = ordered_new_mu_maxDepth[i];
         new_theta_star[i+21] = new_sigma_maxDepth[i];
-        new_theta_star[i+24] = new_mu_step[i];
-        new_theta_star[i+27] = new_sigma_step[i];
-        new_theta_star[i+24] = new_mu_step[i];
+        // new_theta_star[i+24] = new_mu_step[i];
+        new_theta_star[i+24] = ordered_new_mu_step[i];
         new_theta_star[i+27] = new_sigma_step[i];
         new_theta_star[i+30] = new_kappa[i];
         new_theta_star[i+33] = new_a[i];
